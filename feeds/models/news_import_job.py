@@ -1,9 +1,10 @@
 import uuid
 
 from django.db import models
+from feeds.models.workspace import WorkspaceModel
 
 
-class NewsImportJob(models.Model):
+class NewsImportJob(WorkspaceModel):
     STATUS_PENDING = 'pending'
     STATUS_RUNNING = 'running'
     STATUS_COMPLETED = 'completed'

@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 
 from feeds.models import DashboardWeeklySummary, NewsImportJob, NewsItem, NewsItemAnalysis
+from feeds.tenancy import workspace_scope
 from feeds.services.news_analysis import (
     _build_openai_quota_message,
     _build_openai_rate_limit_message,
@@ -123,6 +124,18 @@ def start_dashboard_weekly_summary_job(summary_id, expected_revision):
 
 
 def run_dashboard_weekly_summary_job(summary_id, expected_revision):
+    close_old_connections()
+    try:
+        summary = DashboardWeeklySummary.all_objects.get(pk=summary_id)
+        with workspace_scope(summary.workspace_id):
+            return _run_dashboard_weekly_summary_job(summary_id, expected_revision)
+    except DashboardWeeklySummary.DoesNotExist:
+        logger.warning('Resumo semanal não encontrado.')
+    finally:
+        close_old_connections()
+
+
+def _run_dashboard_weekly_summary_job(summary_id, expected_revision):
     close_old_connections()
     try:
         summary = DashboardWeeklySummary.objects.get(pk=summary_id)

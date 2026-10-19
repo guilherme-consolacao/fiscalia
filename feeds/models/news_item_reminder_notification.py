@@ -1,9 +1,14 @@
 from django.db import models
+from django.conf import settings
+from feeds.tenancy import PersonalManager, current_user_id
 
 from feeds.models.news_item import NewsItem
 
 
 class NewsItemReminderNotification(models.Model):
+    workspace_lookup = 'news_item__workspace_id'
+    objects = PersonalManager()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, default=current_user_id)
     news_item = models.ForeignKey(
         NewsItem,
         verbose_name='informativo',
@@ -22,7 +27,7 @@ class NewsItemReminderNotification(models.Model):
         verbose_name_plural = 'Notificações de Vigência'
         constraints = [
             models.UniqueConstraint(
-                fields=['news_item', 'effective_date', 'days_before'],
+                fields=['news_item', 'effective_date', 'days_before', 'user'],
                 name='unique_news_item_effective_date_reminder',
             ),
         ]

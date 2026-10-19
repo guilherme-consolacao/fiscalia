@@ -82,8 +82,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db(),
+    'default': env.db(default='sqlite:///' + str(BASE_DIR / 'db.sqlite3')),
 }
+DATABASES['default']['CONN_MAX_AGE'] = env.int('DB_CONN_MAX_AGE', default=60)
+if DATABASES['default']['ENGINE'].endswith('sqlite3'):
+    DATABASES['default']['OPTIONS'] = {'timeout': 30}
 
 
 # Password validation

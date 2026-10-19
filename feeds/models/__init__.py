@@ -7,6 +7,8 @@ from .news_item_reminder_notification import NewsItemReminderNotification
 from .source import Source
 from .source_category import SourceCategory
 from .tag import Tag
+from .workspace import Workspace, Membership
+from .news_item_read import NewsItemRead
 
 __all__ = [
     'DashboardWeeklySummary',

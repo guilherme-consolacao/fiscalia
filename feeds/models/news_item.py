@@ -2,9 +2,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from feeds.models.source import Source
+from feeds.models.workspace import WorkspaceModel
 
 
-class NewsItem(models.Model):
+class NewsItem(WorkspaceModel):
     source = models.ForeignKey(
         Source,
         verbose_name='fonte',

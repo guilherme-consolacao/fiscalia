@@ -5,6 +5,7 @@ from django.db import close_old_connections
 from django.utils import timezone
 
 from feeds.models import NewsImportJob
+from feeds.tenancy import workspace_scope
 from feeds.services.news_import import build_news_import_feedback, import_news_items
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,18 @@ def start_news_import_job(job_id):
 
 
 def run_news_import_job(job_id):
+    close_old_connections()
+    try:
+        job = NewsImportJob.all_objects.get(pk=job_id)
+        with workspace_scope(job.workspace_id):
+            return _run_news_import_job(job_id)
+    except NewsImportJob.DoesNotExist:
+        logger.warning('Job de importação não encontrado.')
+    finally:
+        close_old_connections()
+
+
+def _run_news_import_job(job_id):
     close_old_connections()
     try:
         job = NewsImportJob.objects.get(pk=job_id)

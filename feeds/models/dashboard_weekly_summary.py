@@ -1,7 +1,8 @@
 from django.db import models
+from feeds.models.workspace import WorkspaceModel
 
 
-class DashboardWeeklySummary(models.Model):
+class DashboardWeeklySummary(WorkspaceModel):
     STATUS_PENDING = 'pending'
     STATUS_RUNNING = 'running'
     STATUS_COMPLETED = 'completed'
@@ -14,7 +15,7 @@ class DashboardWeeklySummary(models.Model):
         (STATUS_FAILED, 'Falhou'),
     ]
 
-    week_start = models.DateField('início da semana', unique=True)
+    week_start = models.DateField('início da semana')
     week_end = models.DateField('fim da semana')
     revision = models.PositiveIntegerField('revisão', default=1)
     status = models.CharField('status', max_length=16, choices=STATUS_CHOICES, default=STATUS_PENDING)
@@ -34,6 +35,7 @@ class DashboardWeeklySummary(models.Model):
     updated_at = models.DateTimeField('atualizado em', auto_now=True)
 
     class Meta:
+        constraints = [models.UniqueConstraint(fields=['workspace', 'week_start'], name='unique_workspace_week_summary')]
         ordering = ['-week_start']
         verbose_name = 'Resumo Semanal do Dashboard'
         verbose_name_plural = 'Resumos Semanais do Dashboard'

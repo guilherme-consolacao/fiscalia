@@ -1,0 +1,40 @@
+[graphify] MultiDiGraph edge-collapse diagnostic
+input: <in-memory>
+input_stage: provided JSON (normal graph.json is post-build)
+effective_directed: <direct-call>
+nodes: 596
+unverified_code_nodes: 0
+raw_edges: 1451
+valid_candidate_edges: 1235
+missing_endpoint_edges: 0
+dangling_endpoint_edges: 216
+self_loop_edges: 1
+exact_duplicate_edges: 0
+directed_unique_endpoint_pairs: 1214
+directed_same_endpoint_collapsed_edges: 21
+undirected_unique_endpoint_pairs: 1213
+undirected_same_endpoint_collapsed_edges: 22
+same_endpoint_group_count: 21
+relation_variant_groups: 21
+source_file_variant_groups: 0
+source_location_variant_groups: 0
+context_variant_groups: 0
+post_build_graph_type: Graph
+post_build_edges: 1212
+producer_suppression_sites: 11
+producer_suppression_examples:
+  - L1123 seen_ids arity=unknown
+  - L1356 seen_ids arity=unknown
+  - L1358 seen_doc_refs arity=unknown
+  - L1718 seen_ids arity=unknown
+  - L2208 seen_keys arity=unknown
+  - L2377 seen_keys arity=unknown
+  - L3723 seen_ids arity=unknown
+  - L3831 seen_ids arity=unknown
+examples:
+  - feeds_admin_init -> feeds_admin_news_import_job edges=2 relations=['imports_from', 're_exports'] locations=['L1'] contexts=['export', 'import']
+  - feeds_admin_init -> feeds_admin_news_item edges=2 relations=['imports_from', 're_exports'] locations=['L2'] contexts=['export', 'import']
+  - feeds_admin_init -> feeds_admin_news_item_analysis edges=2 relations=['imports_from', 're_exports'] locations=['L3'] contexts=['export', 'import']
+  - feeds_admin_init -> feeds_admin_source edges=2 relations=['imports_from', 're_exports'] locations=['L4'] contexts=['export', 'import']
+  - feeds_admin_init -> feeds_admin_source_category edges=2 relations=['imports_from', 're_exports'] locations=['L5'] contexts=['export', 'import']
+note: normal graph.json is post-build; raw producer loss must be measured earlier.

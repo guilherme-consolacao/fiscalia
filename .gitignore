@@ -8,3 +8,9 @@ db.sqlite3
 .vscode/
 .idea/
 *.log
+.venv/
+.uv-cache/
+graphify-out/cache/
+graphify-out/.*
+graphify-out/*.py
+*.sqlite3

@@ -1,9 +1,12 @@
 from django.db import models
 
 from feeds.models.news_item import NewsItem
+from feeds.tenancy import WorkspaceManager
 
 
 class NewsItemAnalysis(models.Model):
+    workspace_lookup = 'news_item__workspace_id'
+    objects = WorkspaceManager()
     STATUS_COMPLETED = 'completed'
     STATUS_FAILED = 'failed'
 

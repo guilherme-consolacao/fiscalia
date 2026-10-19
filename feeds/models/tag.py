@@ -1,7 +1,8 @@
 from django.db import models
+from feeds.models.workspace import WorkspaceModel
 
 
-class Tag(models.Model):
+class Tag(WorkspaceModel):
     COLOR_BLUE = 'blue'
     COLOR_GREEN = 'green'
     COLOR_RED = 'red'
@@ -22,12 +23,13 @@ class Tag(models.Model):
         (COLOR_GRAY, 'Cinza'),
     ]
 
-    name = models.CharField('nome', max_length=50, unique=True)
+    name = models.CharField('nome', max_length=50)
     color = models.CharField('cor', max_length=20, choices=COLOR_CHOICES, default=COLOR_BLUE)
     created_at = models.DateTimeField('criado em', auto_now_add=True)
     updated_at = models.DateTimeField('atualizado em', auto_now=True)
 
     class Meta:
+        constraints = [models.UniqueConstraint(fields=['workspace', 'name'], name='unique_workspace_tag_name')]
         ordering = ['-created_at']
         verbose_name = 'Tag'
         verbose_name_plural = 'Tags'
