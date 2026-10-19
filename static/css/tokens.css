@@ -1,4 +1,7 @@
 :root {
+  --sidebar-width: 244px;
+  --page-gutter: clamp(16px, 1.8vw, 24px);
+  --page-title-size: 1.5rem;
   --bg-color: #f8f9fa;
   --sidebar-bg: #f8f9fa;
   --text-main: #111827;
@@ -25,5 +28,7 @@ body {
   color: var(--text-main);
   display: flex;
   font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
   min-height: 100vh;
 }

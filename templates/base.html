@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="{% static 'vendor/lucide/lucide.js' %}" defer></script>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/pages/accounts.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ sidebar_app_version }}">
+    <link rel="stylesheet" href="{% static 'css/pages/accounts.css' %}?v={{ sidebar_app_version }}">
     {% block styles %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -41,11 +41,11 @@
                 <div class="header-right">
                     {% if user.is_authenticated %}
                     <div class="account-identity">
-                        <span>{{ user.first_name|default:user.username }} · {{ request.workspace.name }}</span>
+                        <span>{{ user.first_name|default:user.username }}</span>
                         <form method="post" action="{% url 'feeds:switch_workspace' %}">{% csrf_token %}
                           <label for="workspace-switch" class="visually-hidden">Espaço de trabalho</label>
                           <select name="workspace_id" id="workspace-switch">{% for access in available_memberships %}<option value="{{ access.workspace_id }}" {% if access.workspace_id == request.workspace.pk %}selected{% endif %}>{{ access.workspace.name }}</option>{% endfor %}</select>
-                          <button type="submit" class="btn-portal">Alternar espaço</button>
+                          <button type="submit" class="btn-portal" aria-label="Alternar espaço">Alternar</button>
                         </form>
                         <form method="post" action="{% url 'feeds:logout' %}">{% csrf_token %}<button type="submit" class="btn-portal">Sair</button></form>
                     </div>
@@ -67,7 +67,7 @@
         hidden
     ></div>
 
-    <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/app.js' %}?v={{ sidebar_app_version }}"></script>
     <script src="{% static 'js/libras.js' %}"></script>
     {% block scripts %}{% endblock %}
 </body>

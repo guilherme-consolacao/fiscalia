@@ -1,16 +1,16 @@
 .tags-page {
   margin: 0 auto;
   max-width: 72rem;
-  padding: clamp(20px, 3vw, 32px);
+  padding: var(--page-gutter);
   width: 100%;
 }
 
 .tags-header {
   align-items: flex-start;
   display: flex;
-  gap: 24px;
+  gap: 16px;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .tags-page .btn-source-primary {
@@ -39,7 +39,7 @@
 
 .tags-title {
   color: var(--text-main);
-  font-size: 30px;
+  font-size: var(--page-title-size);
   font-weight: 700;
   letter-spacing: -0.03em;
   margin-bottom: 8px;
@@ -66,8 +66,8 @@
   display: flex;
   justify-content: space-between;
   overflow-wrap: anywhere;
-  padding: 18px;
-  min-height: 86px;
+  padding: 14px;
+  min-height: 72px;
 }
 
 .tag-card-main {
@@ -250,7 +250,7 @@
 
 @media (max-width: 720px) {
   .tags-title {
-    font-size: 26px;
+    font-size: 1.375rem;
   }
 }
 

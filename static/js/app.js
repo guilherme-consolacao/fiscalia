@@ -212,7 +212,12 @@
         window.addEventListener('resize', function () {
             if (isDesktopSidebar()) {
                 sidebarState.open = false;
-                syncSidebarState();
+            }
+            syncSidebarState();
+            var sidebar = document.getElementById('app-sidebar');
+            if (sidebar && sidebar.inert && sidebar.contains(document.activeElement)) {
+                var toggle = document.querySelector('[data-sidebar-toggle]');
+                if (toggle) { toggle.focus(); }
             }
         });
     }

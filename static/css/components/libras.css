@@ -1,4 +1,4 @@
-.libras-support { border-top: 1px solid var(--border-color); padding: 1.25rem clamp(20px, 3vw, 32px); margin-top: auto; }
+.libras-support { border-top: 1px solid var(--border-color); padding: .75rem var(--page-gutter); margin-top: auto; }
 .libras-support h2 { font-size: 1rem; margin-bottom: .5rem; }
 .libras-support p { color: var(--text-muted); font-size: .875rem; line-height: 1.5; margin: .5rem 0; max-width: 65ch; }
 .libras-support button { margin-right: .5rem; }
@@ -7,7 +7,7 @@
 .libras-support #vlibras-access-wrapper { position: relative !important; top: auto !important; right: auto !important; left: auto !important; bottom: auto !important; transform: none !important; width: 100% !important; height: 48px !important; z-index: 1 !important; margin-top: .75rem; }
 .libras-support button[hidden] { display: none; }
 .libras-layout { flex-direction: column; }
-.libras-layout #vlibras-app-root { display: block; width: min(360px, calc(100% - 370px)); position: relative; z-index: 1 !important; margin: 1rem 20px 1.25rem 350px; }
+.libras-layout #vlibras-app-root { display: block; width: min(360px, calc(100% - var(--sidebar-width) - 2 * var(--page-gutter))); position: relative; z-index: 1 !important; margin: .75rem var(--page-gutter) 1rem calc(var(--sidebar-width) + var(--page-gutter)); }
 @media (max-width: 1024px) {
   .libras-layout #vlibras-app-root { width: min(360px, calc(100% - 40px)); margin-left: 20px; }
 }

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}Fontes | PI Fiscalia{% endblock %}
-{% block styles %}<link rel="stylesheet" href="{% static 'css/pages/sources.css' %}">{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/pages/sources.css' %}?v={{ sidebar_app_version }}">{% endblock %}
 {% block header_badge %}<span class="badge-new">{{ sources|length }} fontes</span>{% endblock %}
 
 {% block content %}

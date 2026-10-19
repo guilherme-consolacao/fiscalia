@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block styles %}<link rel="stylesheet" href="{% static 'css/pages/users.css' %}">{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/pages/users.css' %}?v={{ sidebar_app_version }}">{% endblock %}
 {% block title %}Editar acesso | Fiscalia{% endblock %}
 {% block header_title %}Equipe{% endblock %}
 {% block header_badge %}{% endblock %}

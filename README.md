@@ -107,6 +107,10 @@ O projeto estará disponível em `http://127.0.0.1:8000/`.
 
 As páginas incluem acesso direto ao conteúdo, foco visível, nomes acessíveis, avisos de estado e modais com contenção e retorno de foco. Menu e formulários se adaptam a telas menores; a tabela de equipe possui sua própria rolagem quando necessário.
 
+O layout usa espaçamentos compactos, títulos de página de 24 px e barra lateral de 244 px no desktop. Em telas pequenas, o cabeçalho ocupa duas linhas e acompanha a rolagem. Os filtros adicionais dos informativos ficam em **Fonte, status, relevância e vigência**; o painel permanece aberto quando há um desses filtros aplicado. O resumo original fica em **Resumo da fonte** quando difere do resumo da análise, evitando repetir o mesmo texto no card.
+
+Os arquivos CSS e o script global incluem `APP_VERSION` na URL. Atualize essa variável a cada versão publicada para invalidar o cache desses arquivos; a entrega e o cache dos estáticos importados devem ser configurados na INFRA.
+
 O botão **Ativar VLibras**, ao final das páginas autenticadas, carrega o serviço oficial somente sob demanda. É possível ocultá-lo e reativá-lo por teclado. A tradução é automática e depende do serviço externo, da rede e do suporte gráfico do navegador. A indisponibilidade é informada sem impedir o uso do portal. Consulte a [documentação oficial](https://www.vlibras.gov.br/doc/widget/installation/webpageintegration.html).
 
 ## Estrutura do Projeto

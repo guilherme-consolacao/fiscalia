@@ -1,29 +1,38 @@
-.account-page { display: grid; place-items: center; padding: 2rem 1rem; }
-.account-card { width: min(100%, 34rem); background: var(--card-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-soft); }
-.account-brand { display: block; font-size: 1.6rem; color: var(--primary-color); font-weight: 700; text-decoration: none; margin-bottom: 1.5rem; }
-.account-card h1 { font-size: 1.7rem; margin-bottom: .75rem; }
+.account-page { display: grid; place-items: center; padding: 1.25rem 1rem; }
+.account-card { width: min(100%, 34rem); background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-soft); }
+.account-brand { display: block; font-size: 1.25rem; color: var(--primary-color); font-weight: 700; text-decoration: none; margin-bottom: 1rem; }
+.account-card h1 { font-size: 1.375rem; margin-bottom: .75rem; }
 .account-card p { line-height: 1.6; margin-bottom: 1rem; }
-.account-card form > div { margin-block: 1.2rem; }
+.account-card form > div { margin-block: .75rem; }
 .account-card label { display: block; font-weight: 600; margin-bottom: .5rem; }
-.account-card input, .account-card select { width: 100%; padding: .8rem; border: 1px solid #718096; border-radius: .5rem; font: inherit; }
+.account-card input, .account-card select { width: 100%; padding: .625rem; border: 1px solid #718096; border-radius: .5rem; font: inherit; }
 .account-card .helptext { color: #4b5563; font-size: .875rem; line-height: 1.5; }
 .account-card ul { padding-left: 1.25rem; }
 .account-card a { color: #355c37; text-underline-offset: .2em; }
 .errorlist { color: #991b1b; padding: .5rem 1.2rem; background: #fff1f2; border-radius: .4rem; }
 .account-card button[type="submit"] { width: 100%; min-height: 44px; justify-content: center; margin-bottom: 1rem; }
-.account-identity { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.account-identity { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
 .account-identity form { display: inline; }
 .account-identity button { cursor: pointer; }
-.account-identity { justify-content: flex-end; max-width: 100%; min-width: 0; font-size: .875rem; }
+.account-identity { justify-content: flex-end; max-width: 100%; min-width: 0; font-size: .8125rem; }
 .account-identity > span { overflow-wrap: anywhere; }
 .account-identity form { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; min-width: 0; }
-.account-identity select { max-width: 15rem; min-width: 0; min-height: 44px; border: 1px solid #718096; border-radius: 6px; padding: .5rem; }
+.account-identity select { max-width: 15rem; min-width: 0; min-height: 36px; border: 1px solid #718096; border-radius: 6px; padding: .5rem; }
+.account-identity select { font: inherit; }
+.account-identity > span { max-width: 14rem; }
 .account-card input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
 @media (max-width: 640px) {
   .account-identity { width: 100%; justify-content: flex-start; }
-  .account-identity > span { flex-basis: 100%; }
+  .account-identity { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+  .account-identity > span { min-width: 0; }
+  .account-identity form:first-of-type { grid-column: 1 / -1; grid-row: 2; }
+  .account-identity form:last-of-type { grid-column: 2; grid-row: 1; }
   .account-identity form { flex: 1; }
   .account-identity select { flex: 1; width: 100%; max-width: 100%; }
   .account-identity .btn-portal { width: auto; }
 }
 @media (max-width: 480px) { .account-card { padding: 1.25rem; } }
+@media (max-width: 640px) {
+  .account-card input, .account-card select { font-size: 16px; }
+  .account-identity select { min-height: 40px; }
+}

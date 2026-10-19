@@ -19,13 +19,14 @@
   background-color: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   height: 100vh;
   overflow-y: auto;
-  padding: 22px 23px;
+  padding: 16px;
   position: sticky;
   top: 0;
-  width: 318px;
+  width: var(--sidebar-width);
+  flex: 0 0 var(--sidebar-width);
   z-index: 40;
 }
 
@@ -33,7 +34,7 @@
   align-items: center;
   display: flex;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   padding-left: 8px;
 }
 
@@ -117,8 +118,8 @@
   font-size: 14px;
   font-weight: 500;
   gap: 12px;
-  min-height: 48px;
-  padding: 12px 16px;
+  min-height: 40px;
+  padding: 8px 12px;
   text-decoration: none;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -150,7 +151,7 @@
 .sidebar-widgets {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   margin-top: auto;
 }
 
@@ -159,7 +160,7 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 20px;
+  padding: 14px;
 }
 
 .assistant-card,
@@ -179,13 +180,13 @@
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.5;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .widget-card hr {
   border: 0;
   border-top: 1px solid var(--border-color);
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .assistant-card {
@@ -267,7 +268,7 @@
 
 .status-card {
   display: block;
-  padding: 16px 20px;
+  padding: 12px 14px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -358,7 +359,7 @@
   display: flex;
   gap: 16px;
   justify-content: space-between;
-  padding: 20px 32px;
+  padding: 10px var(--page-gutter);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -401,7 +402,7 @@
   display: flex;
   flex-shrink: 1;
   min-width: 0;
-  max-width: 70%;
+  max-width: 78%;
 }
 
 .page-content {
@@ -435,23 +436,25 @@
 
 @media (max-width: 900px) {
   .top-header {
-    padding: 18px 24px;
+    padding: 10px var(--page-gutter);
   }
+  .header-left { flex: 0 0 44px; }
+  .header-title, .header-left .badge-new, .header-left .status-dot { display: none; }
+  .header-right { flex: 1; max-width: 100%; }
 }
 
 @media (max-width: 640px) {
   .top-header {
     align-items: stretch;
-    flex-direction: column;
-    gap: 14px;
-    padding: 16px 20px;
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px var(--page-gutter);
+    position: static;
   }
 
-  .header-left,
-  .header-right,
-  .btn-portal {
-    width: 100%;
-  }
+  .header-left { flex: 0 0 44px; }
+  .header-title, .header-left .status-dot, .header-left .badge-new { display: none; }
+  .header-right { flex: 1; }
 
   .header-right {
     justify-content: stretch;

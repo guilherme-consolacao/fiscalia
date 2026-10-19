@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block styles %}<link rel="stylesheet" href="{% static 'css/pages/users.css' %}">{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/pages/users.css' %}?v={{ sidebar_app_version }}">{% endblock %}
 {% block title %}Equipe | Fiscalia{% endblock %}
 {% block header_title %}Equipe{% endblock %}
 {% block header_badge %}{% endblock %}
@@ -11,7 +11,7 @@
   {% if messages %}<ul class="feedback-messages" aria-live="polite">{% for message in messages %}<li class="feedback-message {{ message.tags }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
   <div class="table-scroll" role="region" aria-label="Membros do espaço" tabindex="0">
   <table><caption>Pessoas com acesso ao espaço</caption><thead><tr><th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">Perfil</th><th scope="col">Estado</th><th scope="col">Ação</th></tr></thead>
-  <tbody>{% for member in members %}<tr><th scope="row">{{ member.user.first_name|default:member.user.username }}</th><td>{{ member.user.email }}</td><td>{{ member.get_role_display }}</td><td>{% if member.active and member.user.is_active %}Ativo{% else %}Desativado{% endif %}</td><td><a href="{% url 'feeds:edit_user' member.pk %}">Editar acesso de {{ member.user.first_name|default:member.user.username }}</a></td></tr>{% empty %}<tr><td colspan="5">Nenhuma pessoa neste espaço.</td></tr>{% endfor %}</tbody></table>
+  <tbody>{% for member in members %}<tr><th scope="row">{{ member.user.first_name|default:member.user.username }}</th><td>{{ member.user.email }}</td><td>{{ member.get_role_display }}</td><td>{% if member.active and member.user.is_active %}Ativo{% else %}Desativado{% endif %}</td><td><a href="{% url 'feeds:edit_user' member.pk %}" aria-label="Editar acesso de {{ member.user.first_name|default:member.user.username }}">Editar</a></td></tr>{% empty %}<tr><td colspan="5">Nenhuma pessoa neste espaço.</td></tr>{% endfor %}</tbody></table>
   </div>
   <section class="account-card"><h2>Adicionar pessoa</h2><p>A pessoa precisa criar uma conta primeiro. A inclusão compartilha somente o acervo deste espaço.</p><form method="post" data-account-form>{% csrf_token %}{{ form.as_div }}<button class="btn-primary" type="submit" data-submit-label="Adicionando…">Adicionar à equipe</button><p role="status" data-submit-status></p></form></section>
 </section>
