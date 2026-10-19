@@ -1,27 +1,40 @@
 # Fiscalia
 
-Portal informativo que centraliza feeds RSS de diferentes fontes sobre informações fiscais.
+Portal informativo que centraliza feeds RSS sobre informações fiscais, com contas, equipes e espaços de trabalho isolados.
+
+Cada cadastro cria um espaço privado. Administradores podem adicionar contas existentes à equipe pelo e-mail; somente membros ativos compartilham fontes, tags, notícias e análises daquele espaço. Leitura, acompanhamento e notificações são individuais. A troca de espaço fica no cabeçalho.
+
+| Ação | Leitor | Editor | Administrador do espaço |
+| --- | --- | --- | --- |
+| Consultar notícias, filtros, análises e resumos | Sim | Sim | Sim |
+| Marcar leitura, acompanhar e dispensar lembretes pessoais | Sim | Sim | Sim |
+| Gerenciar fontes/tags, coletar RSS e gerar resumo | Não | Sim | Sim |
+| Adicionar contas existentes, alterar perfis e desativar associações | Não | Não | Sim |
+
+O último administrador ativo não pode ser removido. Desativar a associação revoga o acesso ao espaço, preservando o acesso da pessoa aos outros grupos. O Django Admin é reservado ao superusuário da plataforma.
+
+Veja [arquitetura e análise Graphify](docs/ARCHITECTURE.md) e [segurança, validações e preparação para publicação](docs/SECURITY.md).
 
 ## Tecnologias
-- Python 3.11+
-- Django 5.x
+- Python 3.11+ (validação local: Python 3.14)
+- Django 5.2.18 LTS
 - django-environ (Gerenciamento de variáveis de ambiente)
 
 ## Como rodar o projeto
 
 ### 1. Clonar o repositório
 ```bash
-git clone https://github.com/dn-freelance/pi-fiscalia.git
-cd pi-fiscalia
+git clone https://github.com/guilherme-consolacao/fiscalia.git
+cd fiscalia
 ```
 
 ### 2. Criar e ativar o ambiente virtual (opcional, mas recomendado)
 ```bash
-python -m venv venv
+python -m venv .venv
 # No Windows:
-.\venv\Scripts\activate
+.\.venv\Scripts\activate
 # No Linux/macOS:
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 ### 3. Instalar as dependências
@@ -33,7 +46,8 @@ pip install -r requirements.txt
 Crie um arquivo `.env` na raiz do projeto (use o `.env.example` como base se disponível, ou crie um novo):
 ```env
 DEBUG=True
-SECRET_KEY=django-insecure-sua-chave-aqui
+APP_ENV=development
+SECRET_KEY=substitua-por-uma-chave-aleatoria
 ALLOWED_HOSTS=127.0.0.1,localhost
 DATABASE_URL=sqlite:///db.sqlite3
 NEWS_AI_ENABLED=False
@@ -48,10 +62,20 @@ OPENAI_ORG_ID=
 OPENAI_PROJECT=
 ```
 
+Gere a chave com `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`. Nunca versione `.env`, bancos locais ou credenciais. A IA fica desativada por padrão.
+
 ### 5. Executar as migrações iniciais
 ```bash
 python manage.py migrate
 ```
+
+Abra `/cadastrar/` para criar a primeira conta e seu espaço privado. A migração `0016` preserva o acervo existente em **Acervo legado** (ID 1) e associa usuários antigos ativos; novas contas não recebem acesso automático a esse acervo. Para conceder administração de um espaço a uma conta existente pelo terminal do operador:
+
+```bash
+python manage.py grant_workspace_admin --username usuario-existente --workspace 1
+```
+
+Faça backup antes de migrar uma base existente. A migração de acervo e preferências é coberta por teste automatizado. SQLite atende ao desenvolvimento; a migração e validação operacional em PostgreSQL permanecem na tarefa de INFRA.
 
 ### IA opcional nos informativos
 - Para ativar a análise por IA durante o botão `Atualizar`, defina `NEWS_AI_ENABLED=True`.
@@ -60,14 +84,30 @@ python manage.py migrate
 - Se a IA estiver desabilitada ou configurada incorretamente, os informativos continuam sendo importados normalmente.
 - Para reprocessar informativos antigos com a versão atual do pipeline de IA, use:
 ```bash
-python manage.py backfill_news_analysis
+python manage.py backfill_news_analysis --workspace 1 --limit 5
 ```
+
+O backfill exige um espaço explícito. `--limit 0` processa todas as pendências desse espaço e pode consumir a API. Faça primeiro uma execução pequena. O conteúdo das matérias é enviado ao provedor quando a IA está habilitada; contas e senhas não entram no prompt.
+
+O botão de atualização inicia uma coleta por espaço e reutiliza uma execução já ativa. Jobs rodam no contexto do espaço, sem bloquear a requisição HTTP. Um processo interrompido pode ser recuperado pelo operador:
+
+```bash
+python manage.py process_news_jobs --workspace 1 --recover-stale
+```
+
+Esse comando encerra execuções sem progresso há mais de 30 minutos e executa jobs pendentes. O agendamento e o processo durável de produção serão configurados na tarefa de INFRA; threads locais não substituem essa operação.
 
 ### 6. Iniciar o servidor de desenvolvimento
 ```bash
 python manage.py runserver
 ```
 O projeto estará disponível em `http://127.0.0.1:8000/`.
+
+### Acessibilidade e Libras
+
+As páginas incluem acesso direto ao conteúdo, foco visível, nomes acessíveis, avisos de estado e modais com contenção e retorno de foco. Menu e formulários se adaptam a telas menores; a tabela de equipe possui sua própria rolagem quando necessário.
+
+O botão **Ativar VLibras**, ao final das páginas autenticadas, carrega o serviço oficial somente sob demanda. É possível ocultá-lo e reativá-lo por teclado. A tradução é automática e depende do serviço externo, da rede e do suporte gráfico do navegador. A indisponibilidade é informada sem impedir o uso do portal. Consulte a [documentação oficial](https://www.vlibras.gov.br/doc/widget/installation/webpageintegration.html).
 
 ## Estrutura do Projeto
 - `config/`: Configurações principais do Django.
@@ -162,23 +202,25 @@ Depois de implementar uma mudança, rode os testes para verificar se houve regre
 Para executar a suíte completa:
 
 ```bash
-python manage.py test
+python manage.py test --settings=config.test_settings
 ```
 
 Para rodar apenas um arquivo de testes:
 
 ```bash
-python manage.py test feeds.tests.test_news
+python manage.py test feeds.tests.test_news --settings=config.test_settings
 ```
 
 Para rodar um teste específico:
 
 ```bash
-python manage.py test feeds.tests.test_news.NewsViewTests.test_refresh_news_skips_failed_item_without_interrupting_other_news
+python manage.py test feeds.tests.test_news.NewsViewTests.test_refresh_news_skips_failed_item_without_interrupting_other_news --settings=config.test_settings
 ```
 
 Se quiser uma saída mais detalhada durante a execução, use:
 
 ```bash
-python manage.py test -v 2
+python manage.py test --settings=config.test_settings -v 2
 ```
+
+As configurações de teste usam banco SQLite temporário, chave de IA fictícia, respostas HTTP simuladas e hash rápido somente nos testes. Não use `config.test_settings` para servir o portal.
