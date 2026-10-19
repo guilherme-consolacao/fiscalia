@@ -228,3 +228,5 @@ python manage.py test --settings=config.test_settings -v 2
 ```
 
 As configurações de teste usam banco SQLite temporário, chave de IA fictícia, respostas HTTP simuladas e hash rápido somente nos testes. Não use `config.test_settings` para servir o portal.
+
+O runner bloqueia HTTP e conexões externas sem simulação, inclusive quando a aplicação captura a exceção, para evitar consumo acidental de IA. Instale `requirements-dev.txt` para medir a cobertura. Consulte a [matriz de testes e validação visual](docs/TESTING.md) para os comandos, cenários e limites da última revisão.

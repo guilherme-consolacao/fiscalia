@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = feeds
+omit =
+    feeds/tests/*
+    feeds/migrations/*
+
+[report]
+show_missing = True
+skip_covered = True
+fail_under = 85

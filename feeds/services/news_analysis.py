@@ -740,7 +740,7 @@ def _normalize_keywords(value):
 def _normalize_importance_score(value):
     try:
         numeric_value = int(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
 
     return max(0, min(100, numeric_value))

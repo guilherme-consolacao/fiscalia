@@ -27,6 +27,8 @@ from feeds.services.news_analysis import (
 logger = logging.getLogger(__name__)
 
 SUMMARY_MAX_ITEMS = 25
+SUMMARY_JOB_TIMEOUT = timedelta(minutes=5)
+SUMMARY_RETRY_DELAY = timedelta(minutes=15)
 
 
 class DashboardWeeklySummaryError(Exception):
@@ -183,21 +185,29 @@ def _get_or_create_weekly_summary(week_start, week_end):
     return summary
 
 
-def _ensure_summary_generation(summary):
+def _generation_must_wait(summary):
+    now = timezone.now()
     if summary.status == DashboardWeeklySummary.STATUS_COMPLETED:
-        return summary
-
+        return True
     if summary.status == DashboardWeeklySummary.STATUS_RUNNING:
+        return (summary.started_at or summary.updated_at) > now - SUMMARY_JOB_TIMEOUT
+    if summary.status == DashboardWeeklySummary.STATUS_FAILED:
+        return (summary.finished_at or summary.updated_at) > now - SUMMARY_RETRY_DELAY
+    return False
+
+
+def _ensure_summary_generation(summary):
+    if _generation_must_wait(summary):
         return summary
 
     with transaction.atomic():
         locked_summary = DashboardWeeklySummary.objects.select_for_update().get(pk=summary.pk)
-        if locked_summary.status in {
-            DashboardWeeklySummary.STATUS_COMPLETED,
-            DashboardWeeklySummary.STATUS_RUNNING,
-        }:
+        if _generation_must_wait(locked_summary):
             return locked_summary
 
+        # A recovered worker must not accept a late result from its predecessor.
+        if locked_summary.status in {DashboardWeeklySummary.STATUS_RUNNING, DashboardWeeklySummary.STATUS_FAILED}:
+            locked_summary.revision += 1
         locked_summary.status = DashboardWeeklySummary.STATUS_RUNNING
         locked_summary.overview = ''
         locked_summary.main_changes = ''
@@ -211,6 +221,7 @@ def _ensure_summary_generation(summary):
         locked_summary.save(
             update_fields=[
                 'status',
+                'revision',
                 'overview',
                 'main_changes',
                 'attention',

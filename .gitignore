@@ -15,3 +15,6 @@ graphify-out/.*
 graphify-out/*.py
 graphify-out/manifest.json
 *.sqlite3
+.coverage
+.coverage.*
+htmlcov/
