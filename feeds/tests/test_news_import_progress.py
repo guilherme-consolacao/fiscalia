@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from django.test import TestCase
+from feeds.tests.base import PortalTestCase as TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 
@@ -65,7 +65,7 @@ class NewsImportProgressTests(TestCase):
             )
         )
 
-        with patch('feeds.services.news_import.requests.get', return_value=feed_response):
+        with patch('feeds.services.news_import.fetch_url', return_value=feed_response):
             run_news_import_job(job.id)
 
         job.refresh_from_db()

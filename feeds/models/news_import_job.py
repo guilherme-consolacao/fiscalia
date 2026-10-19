@@ -68,6 +68,7 @@ class NewsImportJob(WorkspaceModel):
     updated_at = models.DateTimeField('atualizado em', auto_now=True)
 
     class Meta:
+        constraints = [models.UniqueConstraint(fields=['workspace'], condition=models.Q(status__in=['pending', 'running']), name='unique_active_workspace_import')]
         ordering = ['-created_at']
         verbose_name = 'Job de Atualização de Informativos'
         verbose_name_plural = 'Jobs de Atualização de Informativos'

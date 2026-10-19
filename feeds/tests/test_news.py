@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import requests
 from django.core.management import call_command
-from django.test import TestCase
+from feeds.tests.base import PortalTestCase as TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -14,6 +14,7 @@ from feeds.models import (
     NewsItemAnalysis,
     NewsItemFollow,
     NewsItemReminderNotification,
+    NewsItemRead,
     Source,
     SourceCategory,
 )
@@ -280,7 +281,7 @@ class NewsViewTests(TestCase):
             },
         ]))
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content):
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content):
             first_response = self.client.post(reverse('feeds:refresh_news'), follow=True)
             second_response = self.client.post(reverse('feeds:refresh_news'), follow=True)
 
@@ -306,7 +307,7 @@ class NewsViewTests(TestCase):
             },
         ]))
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content):
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content):
             self.client.post(reverse('feeds:refresh_news'))
 
         imported_item = NewsItem.objects.get()
@@ -341,7 +342,7 @@ class NewsViewTests(TestCase):
             },
         ]))
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content) as mocked_get:
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content) as mocked_get:
             self.client.post(reverse('feeds:refresh_news'))
 
         self.assertEqual(mocked_get.call_count, 1)
@@ -370,7 +371,7 @@ class NewsViewTests(TestCase):
             },
         ]))
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content):
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content):
             self.client.post(reverse('feeds:refresh_news'))
 
         imported_item = NewsItem.objects.get()
@@ -410,7 +411,7 @@ class NewsViewTests(TestCase):
 
             return original_get_or_create(*args, **kwargs)
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content):
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content):
             with self.assertLogs('feeds.services.news_import', level='WARNING') as captured_logs:
                 with patch('feeds.services.news_import.NewsItem.objects.get_or_create', side_effect=flaky_get_or_create):
                     response = self.client.post(reverse('feeds:refresh_news'), follow=True)
@@ -447,7 +448,7 @@ class NewsViewTests(TestCase):
             },
         ]))
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content):
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content):
             response = self.client.post(reverse('feeds:refresh_news'), follow=True)
 
         self.assertEqual(NewsItem.objects.count(), 0)
@@ -583,7 +584,7 @@ class NewsViewTests(TestCase):
         ]))
 
         with patch(
-            'feeds.services.news_import.requests.get',
+            'feeds.services.news_import.fetch_url',
             side_effect=[requests.RequestException('boom'), response_content],
         ):
             with self.assertLogs('feeds.services.news_import', level='WARNING') as captured_logs:
@@ -628,6 +629,7 @@ class NewsViewTests(TestCase):
             dedupe_key='dedupe-pis-1',
             is_read=True,
         )
+        NewsItemRead.objects.create(news_item=read_item, user=self.portal_user)
 
         response = self.client.get(reverse('feeds:news'), {'q': 'ICMS'})
         self.assertEqual(list(response.context['news_items']), [unread_item])
@@ -671,7 +673,7 @@ class NewsViewTests(TestCase):
         )
 
         item.refresh_from_db()
-        self.assertTrue(item.is_read)
+        self.assertTrue(NewsItemRead.objects.filter(news_item=item, user=self.portal_user).exists())
         self.assertEqual(
             response.redirect_chain[0][0],
             (
@@ -994,8 +996,8 @@ class NewsViewTests(TestCase):
 
         selected_item.refresh_from_db()
         untouched_item.refresh_from_db()
-        self.assertTrue(selected_item.is_read)
-        self.assertFalse(untouched_item.is_read)
+        self.assertTrue(NewsItemRead.objects.filter(news_item=selected_item, user=self.portal_user).exists())
+        self.assertFalse(NewsItemRead.objects.filter(news_item=untouched_item, user=self.portal_user).exists())
         self.assertEqual(
             response.redirect_chain[0][0],
             (
@@ -1020,6 +1022,7 @@ class NewsViewTests(TestCase):
             dedupe_key='dedupe-bulk-unread-1',
             is_read=True,
         )
+        NewsItemRead.objects.create(news_item=selected_item, user=self.portal_user)
 
         response = self.client.post(
             reverse('feeds:bulk_update_news_read'),
@@ -1031,7 +1034,7 @@ class NewsViewTests(TestCase):
         )
 
         selected_item.refresh_from_db()
-        self.assertFalse(selected_item.is_read)
+        self.assertFalse(NewsItemRead.objects.filter(news_item=selected_item, user=self.portal_user).exists())
         self.assertContains(response, '1 informativo(s) marcado(s) como não lidos.')
 
     def test_bulk_update_news_read_requires_selection(self):
@@ -1287,7 +1290,7 @@ class NewsViewTests(TestCase):
             },
         ]))
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content):
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content):
             response = self.client.post(
                 reverse('feeds:refresh_news'),
                 {'sort': 'score'},
@@ -1310,7 +1313,7 @@ class NewsViewTests(TestCase):
         responses_by_url = build_gov_br_response_map()
 
         with patch(
-            'feeds.services.news_import.requests.get',
+            'feeds.services.news_import.fetch_url',
             side_effect=lambda url, **kwargs: responses_by_url[url],
         ):
             response = self.client.post(reverse('feeds:refresh_news'), follow=True)
@@ -1347,7 +1350,7 @@ class NewsViewTests(TestCase):
         )
 
         with patch(
-            'feeds.services.news_import.requests.get',
+            'feeds.services.news_import.fetch_url',
             side_effect=lambda url, **kwargs: responses_by_url[url],
         ):
             with self.assertLogs('feeds.services.news_import', level='WARNING') as captured_logs:
@@ -1384,7 +1387,7 @@ class NewsViewTests(TestCase):
         )
 
         with patch(
-            'feeds.services.news_import.requests.get',
+            'feeds.services.news_import.fetch_url',
             side_effect=lambda url, **kwargs: responses_by_url[url],
         ):
             self.client.post(reverse('feeds:refresh_news'))
@@ -1418,7 +1421,7 @@ class NewsViewTests(TestCase):
         )
 
         with patch(
-            'feeds.services.news_import.requests.get',
+            'feeds.services.news_import.fetch_url',
             side_effect=lambda url, **kwargs: responses_by_url[url],
         ):
             response = self.client.post(reverse('feeds:refresh_news'), follow=True)

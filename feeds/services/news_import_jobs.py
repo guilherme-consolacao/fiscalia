@@ -27,6 +27,8 @@ def run_news_import_job(job_id):
     try:
         job = NewsImportJob.all_objects.get(pk=job_id)
         with workspace_scope(job.workspace_id):
+            if not NewsImportJob.objects.filter(pk=job_id, status=NewsImportJob.STATUS_PENDING).update(status=NewsImportJob.STATUS_RUNNING):
+                return
             return _run_news_import_job(job_id)
     except NewsImportJob.DoesNotExist:
         logger.warning('Job de importação não encontrado.')

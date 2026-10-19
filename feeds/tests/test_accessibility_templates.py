@@ -1,4 +1,4 @@
-from django.test import TestCase
+from feeds.tests.base import PortalTestCase as TestCase
 from django.urls import reverse
 
 from feeds.models import NewsItem, Source, SourceCategory

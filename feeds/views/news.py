@@ -3,6 +3,7 @@ from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.contrib import messages
+from django.db import transaction, IntegrityError
 from django.db.models import Case, F, IntegerField, Q, Value, When
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
@@ -19,7 +20,10 @@ from feeds.models import (
     NewsItemFollow,
     NewsItemReminderNotification,
     Source,
+    NewsItemRead,
+    Workspace,
 )
+from feeds.services.news_preferences import personal_news
 from feeds.services.news_import_jobs import run_news_import_job, start_news_import_job
 from feeds.permissions import editor_required
 
@@ -62,7 +66,7 @@ RELEVANCE_OPTIONS = [
 
 def index(request):
     filters = _filters_from_query(request)
-    news_items = NewsItem.objects.select_related('source', 'source__category', 'analysis')
+    news_items = personal_news().select_related('source', 'source__category', 'analysis')
 
     if filters['query']:
         news_items = news_items.filter(
@@ -75,9 +79,9 @@ def index(request):
         news_items = news_items.filter(source_id=filters['source_id'])
 
     if filters['status'] == STATUS_READ:
-        news_items = news_items.filter(is_read=True)
+        news_items = news_items.filter(user_has_read=True)
     elif filters['status'] == STATUS_UNREAD:
-        news_items = news_items.filter(is_read=False)
+        news_items = news_items.filter(user_has_read=False)
 
     if filters['relevance'] != RELEVANCE_ALL:
         news_items = news_items.filter(
@@ -97,6 +101,7 @@ def index(request):
     )
 
     for item in news_items:
+        item.is_read = item.user_has_read
         analysis = item.analysis_or_none
         item.has_trackable_effective_date = bool(analysis is not None and analysis.effective_date is not None)
         item.is_following_effective_date = item.id in tracked_news_ids
@@ -114,7 +119,7 @@ def index(request):
         'selected_sort': filters['sort'],
         'selected_effective_date_from': filters['effective_date_from_raw'],
         'selected_effective_date_to': filters['effective_date_to_raw'],
-        'unread_count': NewsItem.objects.filter(is_read=False).count(),
+        'unread_count': personal_news().filter(user_has_read=False).count(),
     }
     return render(request, 'pages/news/index.html', context)
 
@@ -122,7 +127,29 @@ def index(request):
 @require_POST
 @editor_required
 def refresh_news(request):
-    job = NewsImportJob.objects.create(
+    with transaction.atomic():
+        Workspace.objects.select_for_update().get(pk=request.workspace.pk)
+        existing = NewsImportJob.objects.filter(status__in=['pending', 'running']).first()
+        if existing:
+            return redirect('feeds:refresh_news_progress', job_id=existing.pk)
+    # A database constraint below also handles concurrent SQLite workers.
+    try:
+        with transaction.atomic():
+            job = _create_refresh_job(request)
+    except IntegrityError:
+        job = NewsImportJob.objects.filter(status__in=['pending', 'running']).first()
+        if job:
+            return redirect('feeds:refresh_news_progress', job_id=job.pk)
+        raise
+    if request.headers.get('X-Fiscalia-Sync-Import') == '1':
+        run_news_import_job(job.id)
+        return redirect('feeds:finalize_refresh_news_job', job_id=job.id)
+    start_news_import_job(job.id)
+    return redirect('feeds:refresh_news_progress', job_id=job.id)
+
+
+def _create_refresh_job(request):
+    return NewsImportJob.objects.create(
         redirect_query=request.POST.get('q', '').strip(),
         redirect_source=request.POST.get('source', '').strip(),
         redirect_status=request.POST.get('status', STATUS_ALL).strip() or STATUS_ALL,
@@ -131,14 +158,6 @@ def refresh_news(request):
         redirect_effective_date_from=request.POST.get('effective_date_from', '').strip(),
         redirect_effective_date_to=request.POST.get('effective_date_to', '').strip(),
     )
-
-    if request.headers.get('X-Fiscalia-Sync-Import') == '1':
-        run_news_import_job(job.id)
-        return redirect('feeds:finalize_refresh_news_job', job_id=job.id)
-
-    start_news_import_job(job.id)
-    return redirect('feeds:refresh_news_progress', job_id=job.id)
-
 
 @editor_required
 def refresh_news_progress(request, job_id):
@@ -184,10 +203,11 @@ def finalize_refresh_news_job(request, job_id):
 @require_POST
 def toggle_news_read(request, news_id):
     news_item = get_object_or_404(NewsItem, pk=news_id)
-    news_item.is_read = not news_item.is_read
-    news_item.save(update_fields=['is_read', 'updated_at'])
+    marker, created = NewsItemRead.objects.get_or_create(news_item=news_item)
+    if not created:
+        marker.delete()
 
-    status_label = 'lido' if news_item.is_read else 'não lido'
+    status_label = 'lido' if created else 'não lido'
     messages.success(request, f'Informativo marcado como {status_label}.')
 
     return _redirect_with_filters(request)
@@ -255,7 +275,7 @@ def effective_date_reminders(request):
         NewsItemReminderNotification.objects.filter(
             reminder_date=today,
             dismissed_at__isnull=True,
-            news_item__follow__isnull=False,
+            news_item_id__in=NewsItemFollow.objects.values('news_item_id'),
             news_item__analysis__effective_date=F('effective_date'),
         )
         .select_related('news_item', 'news_item__analysis', 'news_item__source')
@@ -293,7 +313,12 @@ def bulk_update_news_read(request):
         return _redirect_with_filters(request)
 
     is_read = action == BULK_ACTION_MARK_READ
-    updated_count = NewsItem.objects.filter(id__in=selected_ids).update(is_read=is_read)
+    items = NewsItem.objects.filter(id__in=selected_ids)
+    updated_count = items.count()
+    if is_read:
+        NewsItemRead.objects.bulk_create([NewsItemRead(news_item_id=pk, user=request.user) for pk in items.values_list('pk',flat=True)], ignore_conflicts=True)
+    else:
+        NewsItemRead.objects.filter(news_item_id__in=items.values('pk')).delete()
     status_label = 'lidos' if is_read else 'não lidos'
     messages.success(request, f'{updated_count} informativo(s) marcado(s) como {status_label}.')
 

@@ -3,13 +3,14 @@ from django.urls import reverse
 
 from feeds.models import DashboardWeeklySummary, NewsImportJob, NewsItem, NewsItemAnalysis, Source, Membership
 from feeds.services.dashboard_weekly_summary import get_current_week_range
+from feeds.services.news_preferences import personal_news
 
 
 def sidebar_context(request):
     if not request.user.is_authenticated or not getattr(request, 'workspace', None):
         return {}
     total_news = NewsItem.objects.count()
-    unread_count = NewsItem.objects.filter(is_read=False).count()
+    unread_count = personal_news().filter(user_has_read=False).count()
     high_relevance_count = NewsItemAnalysis.objects.filter(
         status=NewsItemAnalysis.STATUS_COMPLETED,
         impact_level=NewsItemAnalysis.IMPACT_HIGH,

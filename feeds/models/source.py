@@ -2,11 +2,12 @@ from django.db import models
 
 from feeds.models.source_category import SourceCategory
 from feeds.models.workspace import WorkspaceModel
+from feeds.validators import validate_public_url
 
 
 class Source(WorkspaceModel):
     name = models.CharField('nome', max_length=150)
-    url = models.URLField('URL do feed RSS', max_length=500)
+    url = models.URLField('URL do feed RSS', max_length=500, validators=[validate_public_url])
     description = models.TextField('descrição', blank=True)
     category = models.ForeignKey(
         SourceCategory,

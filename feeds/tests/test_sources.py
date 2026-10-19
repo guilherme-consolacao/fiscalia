@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.test import TestCase
+from feeds.tests.base import PortalTestCase as TestCase
 from django.urls import reverse
 from django.utils import timezone
 

@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from feeds.models import NewsItem, NewsItemAnalysis
 from feeds.services.dashboard_weekly_summary import get_current_week_summary_state
+from feeds.services.news_preferences import personal_news
 
 
 def get_dashboard_context():
@@ -17,7 +18,7 @@ def get_dashboard_context():
     current_month_end = current_date.replace(day=monthrange(current_date.year, current_date.month)[1])
 
     news_items = list(
-        NewsItem.objects.select_related('source', 'source__category', 'analysis')
+        personal_news().select_related('source', 'source__category', 'analysis')
         .annotate(reference_at=Coalesce('published_at', 'created_at'))
         .order_by('-reference_at', '-created_at')
     )
@@ -36,7 +37,7 @@ def get_dashboard_context():
         item.dashboard_effective_date_display = analysis.effective_date_display if analysis is not None else ''
         item.dashboard_keywords = analysis.keywords if analysis is not None and analysis.keywords else []
 
-        if not item.is_read:
+        if not item.user_has_read:
             unread_count += 1
 
         if analysis is None:

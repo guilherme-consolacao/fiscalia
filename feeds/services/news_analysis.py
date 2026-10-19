@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import date
 
 import requests
+from feeds.services.safe_http import fetch_url
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -954,7 +955,7 @@ def _persist_analysis_failure(news_item, provider_name, model_name, pipeline_ver
 
 def _fetch_article_content(url, timeout_seconds):
     try:
-        response = requests.get(
+        response = fetch_url(
             url,
             timeout=timeout_seconds,
             headers={

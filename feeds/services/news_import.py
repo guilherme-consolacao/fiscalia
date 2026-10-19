@@ -20,6 +20,8 @@ from django.utils.html import strip_tags
 from feeds.models import NewsItem, Source
 from feeds.services.dashboard_weekly_summary import invalidate_current_week_summary
 from feeds.services.news_analysis import build_news_analysis_service
+from feeds.services.safe_http import fetch_url, validate_public_url
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +263,7 @@ def _import_source_entries(source, response, result, timeout, analysis_candidate
     imported_count = 0
     skipped_count = 0
 
-    for entry in feed.entries:
+    for entry in feed.entries[:200]:
         try:
             payload = _build_news_payload(entry)
         except Exception:
@@ -298,7 +300,7 @@ def _request_url(url, timeout, accept_html=False):
     if accept_html:
         headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
 
-    response = requests.get(url, timeout=timeout, headers=headers)
+    response = fetch_url(url, timeout=timeout, headers=headers)
     response.raise_for_status()
     return response
 
@@ -407,7 +409,12 @@ def _clean_summary(value):
 
 
 def _clean_url(value):
-    return str(value or '').strip()
+    url = str(value or '').strip()
+    try:
+        validate_public_url(url)
+    except ValidationError:
+        return ''
+    return url
 
 
 def _normalize_for_hash(value):
@@ -726,7 +733,7 @@ def _extract_gov_br_news_entries(html_content):
             'published_at': published_at,
         })
 
-    return entries
+    return entries[:200]
 
 
 def _parse_gov_br_listing_date(date_value):
@@ -774,6 +781,7 @@ def _load_gov_br_article_published_at_batch(entries, existing_items_by_link, tim
         return {}
 
     published_at_by_link = {}
+    article_links = article_links[:16]
     max_workers = min(4, len(article_links))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_by_link = {

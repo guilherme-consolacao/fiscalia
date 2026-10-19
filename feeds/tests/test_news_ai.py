@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import requests
 from django.core.management import call_command
-from django.test import TestCase
+from feeds.tests.base import PortalTestCase as TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -120,7 +120,7 @@ class NewsAnalysisTests(TestCase):
     def test_refresh_news_with_ai_disabled_keeps_import_without_analysis(self):
         self._create_source()
 
-        with patch('feeds.services.news_import.requests.get', return_value=self._feed_response()):
+        with patch('feeds.services.news_import.fetch_url', return_value=self._feed_response()):
             response = self.client.post(reverse('feeds:refresh_news'), follow=True)
 
         imported_item = NewsItem.objects.get()
@@ -134,7 +134,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -194,7 +194,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -238,7 +238,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -273,7 +273,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch('feeds.services.news_analysis.requests.post', side_effect=requests.Timeout('timeout')),
@@ -299,7 +299,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -325,7 +325,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch('feeds.services.news_analysis.requests.post', side_effect=requests.Timeout('timeout')),
@@ -370,7 +370,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -401,7 +401,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -454,7 +454,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -505,7 +505,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -543,7 +543,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch('feeds.services.news_analysis.requests.post') as mocked_post,
@@ -569,7 +569,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
@@ -581,7 +581,7 @@ class NewsAnalysisTests(TestCase):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch('feeds.services.news_analysis.requests.post') as mocked_post,
@@ -605,7 +605,7 @@ class NewsAnalysisTests(TestCase):
         output = StringIO()
 
         with (
-            patch('feeds.services.news_analysis.requests.get', return_value=self._article_response()),
+            patch('feeds.services.news_analysis.fetch_url', return_value=self._article_response()),
             patch(
                 'feeds.services.news_analysis.requests.post',
                 return_value=DummyJsonResponse(

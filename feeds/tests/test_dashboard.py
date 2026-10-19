@@ -3,12 +3,12 @@ from datetime import timedelta
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 
-from django.test import TestCase
+from feeds.tests.base import PortalTestCase as TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from feeds.models import DashboardWeeklySummary, NewsItem, NewsItemAnalysis, Source, SourceCategory
+from feeds.models import DashboardWeeklySummary, NewsItem, NewsItemAnalysis, Source, SourceCategory, NewsItemRead
 from feeds.tests.test_news import DummyResponse, build_ai_settings, build_feed
 
 
@@ -58,6 +58,7 @@ class DashboardViewTests(TestCase):
             published_at=timezone.now() - timedelta(days=1),
             is_read=True,
         )
+        NewsItemRead.objects.create(news_item=month_item, user=self.portal_user)
         low_item = NewsItem.objects.create(
             source=source,
             title='Comunicado institucional',
@@ -262,7 +263,7 @@ class DashboardViewTests(TestCase):
             )
         )
 
-        with patch('feeds.services.news_import.requests.get', return_value=response_content):
+        with patch('feeds.services.news_import.fetch_url', return_value=response_content):
             self.client.post(reverse('feeds:refresh_news'), follow=True)
 
         summary.refresh_from_db()

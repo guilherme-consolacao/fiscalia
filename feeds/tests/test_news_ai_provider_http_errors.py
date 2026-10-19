@@ -17,7 +17,7 @@ class NewsAnalysisProviderHttpErrorTests(NewsAnalysisTests):
 
         with (
             patch(
-                'feeds.services.news_import.requests.get',
+                'feeds.services.news_import.fetch_url',
                 side_effect=self._request_get_side_effect(feed_response, article_response),
             ),
             patch(
