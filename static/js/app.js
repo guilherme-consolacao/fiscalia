@@ -222,6 +222,45 @@
         });
     }
 
+    function setupHeaderMenus() {
+        var menus = Array.from(document.querySelectorAll('[data-header-menu]'));
+
+        function closeMenu(menu, restoreFocus) {
+            menu.open = false;
+            if (restoreFocus) { menu.querySelector('summary').focus(); }
+        }
+
+        menus.forEach(function (menu) {
+            menu.addEventListener('toggle', function () {
+                if (menu.open) {
+                    menus.forEach(function (other) {
+                        if (other !== menu) { closeMenu(other, false); }
+                    });
+                }
+            });
+            menu.addEventListener('focusout', function (event) {
+                if (event.relatedTarget && !menu.contains(event.relatedTarget)) {
+                    closeMenu(menu, false);
+                }
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            menus.forEach(function (menu) {
+                if (menu.open && !menu.contains(event.target)) { closeMenu(menu, false); }
+            });
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') { return; }
+            menus.forEach(function (menu) {
+                if (menu.open) {
+                    event.preventDefault();
+                    closeMenu(menu, true);
+                }
+            });
+        });
+    }
+
     function getOrCreateToastContainer() {
         var container = document.querySelector('.toast-container');
         if (!container) {
@@ -586,6 +625,7 @@
         setupEffectiveDateReminders();
         setupAssistantWidget();
         setupSidebar();
+        setupHeaderMenus();
     });
 
     window.Fiscalia = {

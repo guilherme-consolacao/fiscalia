@@ -40,15 +40,7 @@
                 </div>
                 <div class="header-right">
                     {% if user.is_authenticated %}
-                    <div class="account-identity">
-                        <span>{{ user.first_name|default:user.username }}</span>
-                        <form method="post" action="{% url 'feeds:switch_workspace' %}">{% csrf_token %}
-                          <label for="workspace-switch" class="visually-hidden">Espaço de trabalho</label>
-                          <select name="workspace_id" id="workspace-switch">{% for access in available_memberships %}<option value="{{ access.workspace_id }}" {% if access.workspace_id == request.workspace.pk %}selected{% endif %}>{{ access.workspace.name }}</option>{% endfor %}</select>
-                          <button type="submit" class="btn-portal" aria-label="Alternar espaço">Alternar</button>
-                        </form>
-                        <form method="post" action="{% url 'feeds:logout' %}">{% csrf_token %}<button type="submit" class="btn-portal">Sair</button></form>
-                    </div>
+                    {% include 'layouts/header_identity.html' %}
                     {% endif %}
                 </div>
             </header>

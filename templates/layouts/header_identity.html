@@ -1,0 +1,59 @@
+<div class="account-identity" aria-label="Conta e equipe">
+    <details class="header-menu workspace-menu" data-header-menu>
+        <summary class="header-menu-trigger" aria-controls="workspace-options" aria-label="Equipe atual: {{ request.workspace.name }}. Trocar de equipe">
+            <span class="header-team-icon" aria-hidden="true"><i data-lucide="users"></i></span>
+            <span class="header-menu-label">
+                <span class="header-menu-eyebrow">Equipe atual</span>
+                <strong title="{{ request.workspace.name }}">{{ request.workspace.name }}</strong>
+            </span>
+            <i class="header-menu-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
+        </summary>
+        <section class="header-menu-panel" id="workspace-options" aria-labelledby="workspace-menu-heading">
+            <h2 id="workspace-menu-heading">Suas equipes</h2>
+            <p class="header-menu-help">Fontes, tags e informativos pertencem à equipe selecionada.</p>
+            <div class="workspace-options">
+                {% for access in available_memberships %}
+                <form method="post" action="{% url 'feeds:switch_workspace' %}">
+                    {% csrf_token %}
+                    <button type="submit" name="workspace_id" value="{{ access.workspace_id }}" class="workspace-option{% if access.workspace_id == request.workspace.pk %} is-current{% endif %}"{% if access.workspace_id == request.workspace.pk %} disabled aria-current="true"{% endif %}>
+                        <span class="workspace-option-label">
+                            <strong>{{ access.workspace.name }}</strong>
+                            <span>{{ access.get_role_display }}{% if access.workspace_id == request.workspace.pk %} · Equipe atual{% endif %}</span>
+                        </span>
+                        {% if access.workspace_id == request.workspace.pk %}<i data-lucide="check" aria-hidden="true"></i>{% endif %}
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+            <p class="header-menu-footnote">Ao trocar de equipe, você continua na mesma conta.</p>
+            {% if can_manage_users %}
+            <a class="header-menu-action" href="{% url 'feeds:users' %}"><i data-lucide="user-cog" aria-hidden="true"></i>Gerenciar equipe atual</a>
+            {% endif %}
+        </section>
+    </details>
+
+    <details class="header-menu user-menu" data-header-menu>
+        <summary class="header-menu-trigger" aria-controls="account-options">
+            <span class="account-avatar" aria-hidden="true">{{ user.first_name|default:user.username|slice:':1'|upper }}</span>
+            <span class="header-menu-label">
+                <span class="header-menu-eyebrow">Minha conta</span>
+                <strong title="{{ user.get_full_name|default:user.username }}">{{ user.get_full_name|default:user.username }}</strong>
+            </span>
+            <i class="header-menu-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
+        </summary>
+        <section class="header-menu-panel" id="account-options" aria-labelledby="account-menu-heading">
+            <h2 id="account-menu-heading">Minha conta</h2>
+            <p class="account-name">{{ user.get_full_name|default:user.username }}</p>
+            <p class="account-email">{{ user.email|default:user.username }}</p>
+            <dl class="account-membership">
+                <div><dt>Equipe atual</dt><dd>{{ request.workspace.name }}</dd></div>
+                <div><dt>Seu papel nesta equipe</dt><dd>{{ request.membership.get_role_display }}</dd></div>
+            </dl>
+            <p class="header-menu-footnote">Suas leituras e acompanhamentos são individuais.</p>
+            <form method="post" action="{% url 'feeds:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="header-menu-action"><i data-lucide="log-out" aria-hidden="true"></i>Sair da conta</button>
+            </form>
+        </section>
+    </details>
+</div>

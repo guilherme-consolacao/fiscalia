@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django.test import Client
-from feeds.models import NewsItemAnalysis
+from feeds.models import NewsItemAnalysis, Membership, Workspace
 from feeds.tests.scenarios import WorkspaceScenario
 
 
@@ -34,7 +34,7 @@ class CompactLayoutContracts(WorkspaceScenario):
         response = self.client.get(reverse('feeds:news'))
         self.assertContains(response, '<span class="visually-hidden">Pesquisar informativos</span>')
         self.assertContains(response, f'Selecionar {self.item.title}')
-        self.assertContains(response, 'aria-label="Alternar espaço"')
+        self.assertContains(response, 'aria-controls="workspace-options"')
 
     def test_styles_use_release_version_for_browser_cache_invalidation(self):
         for name in ('index','news','sources','tags','users','login','signup'):
@@ -43,3 +43,37 @@ class CompactLayoutContracts(WorkspaceScenario):
                 response = client.get(reverse('feeds:' + name))
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, '.css?v=')
+
+    def test_account_and_team_identity_only_offer_active_memberships(self):
+        user = self.users['admin']
+        user.first_name = 'Ana'
+        user.last_name = 'Silva'
+        user.save(update_fields=['first_name', 'last_name'])
+        second = Workspace.objects.create(name='Equipe de revisão')
+        inactive = Workspace.objects.create(name='Equipe desativada')
+        Membership.objects.create(workspace=second, user=user, role='reader')
+        Membership.objects.create(workspace=inactive, user=user, role='editor', active=False)
+        response = self.client.get(reverse('feeds:index'))
+        self.assertContains(response, 'Minha conta')
+        self.assertContains(response, 'Ana Silva')
+        self.assertContains(response, user.email)
+        self.assertContains(response, 'Seu papel nesta equipe')
+        self.assertContains(response, 'Administrador')
+        self.assertContains(response, second.name)
+        self.assertNotContains(response, inactive.name)
+        self.assertNotContains(response, self.foreign_space.name)
+
+        response = self.client.post(reverse('feeds:switch_workspace'), {'workspace_id':second.pk}, follow=True)
+        self.assertEqual(response.wsgi_request.user.pk, user.pk)
+        self.assertEqual(response.wsgi_request.workspace.pk, second.pk)
+        self.assertContains(response, user.email)
+        self.assertContains(response, '<dd>Leitor</dd>')
+        self.assertNotContains(response, 'Gerenciar equipe atual')
+
+    def test_single_team_shows_current_choice_and_keeps_exit_in_account_menu(self):
+        response = self.client.get(reverse('feeds:index'))
+        self.assertContains(response, 'class="workspace-option is-current" disabled aria-current="true"')
+        self.assertContains(response, 'Fontes, tags e informativos pertencem à equipe selecionada.')
+        self.assertContains(response, 'Ao trocar de equipe, você continua na mesma conta.')
+        self.assertContains(response, 'Sair da conta')
+        self.assertNotContains(response, 'id="workspace-switch"')

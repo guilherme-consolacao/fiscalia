@@ -10,7 +10,7 @@ Os ícones Lucide são servidos localmente; licença, versão e SHA-256 estão e
 
 ## Evidências de validação
 
-- 215 testes Django passaram, incluindo regressões, isolamento, papéis, preferências individuais, URLs/redirecionamentos inseguros, CSRF, tentativas de login e migração de acervo de `0015` até a versão atual. A [matriz de testes](TESTING.md) registra a cobertura e a revisão adicional de densidade e responsividade.
+- 217 testes Django passaram, incluindo regressões, isolamento, papéis, preferências individuais, URLs/redirecionamentos inseguros, CSRF, tentativas de login, identidade preservada na troca de equipe e migração de acervo de `0015` até a versão atual. A [matriz de testes](TESTING.md) registra a cobertura e as revisões de densidade, responsividade e identificação de conta/equipe.
 - Testes de IA usam chave fictícia e respostas simuladas, incluindo erros HTTP, limite de uso e parsing. Nenhuma chamada paga foi necessária para a suíte.
 - Validação manual no segundo Chrome: cadastro/login, fontes, modal por teclado/Escape/retorno de foco, contraste e reflow em quadros de 390/320 px, carregamento e ocultação do VLibras e continuidade do portal quando o script externo falha.
 - A validação de layout não equivale a certificação WCAG. Não foi executada uma sessão completa com leitor de tela real.

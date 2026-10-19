@@ -41,13 +41,13 @@ python -m pip check
 | Análises de IA | Payload, lotes, score/tags/datas, saídas inválidas e extremas, erros de configuração/provedor/cota, falhas parciais e continuidade da importação |
 | Resumo semanal | Semana no fuso local, isolamento, configuração, payload limitado, respostas inválidas, 429/503, falha persistida, reaproveitamento, recuperação, revisão e rejeição de worker antigo |
 | Jobs e comandos | Reivindicação única, contexto do worker, progresso limitado, falha sem exposição de detalhes, job inexistente, bootstrap idempotente, backfill e recuperação restritos ao espaço explícito |
-| Interface | Filtros recolhidos/ativos, resumo sem duplicação, conteúdo complementar disponível, nomes acessíveis e versão nas URLs de estilos; reflow e interação complementados pelo navegador |
+| Interface | Filtros recolhidos/ativos, resumo sem duplicação, conteúdo complementar disponível, nomes acessíveis, conta distinta da equipe, opções restritas a associações ativas, identidade preservada na troca e versão nas URLs de estilos; reflow e interação complementados pelo navegador |
 
 Os módulos originais de `feeds/tests/` permanecem na suíte. Os arquivos `test_*_contracts.py`, `test_weekly_summary_service.py`, `test_jobs_and_commands.py` e `test_http_boundaries.py` ampliam os cenários usando dois espaços e dados independentes em `scenarios.py`.
 
 ## Resultado da revisão de 19/10/2026
 
-- 215 testes passaram; nenhuma chamada paga de IA ou acesso HTTP externo foi realizado pela suíte.
+- 217 testes passaram, incluindo a revisão de identidade de conta/equipe; nenhuma chamada paga de IA ou acesso HTTP externo foi realizado pela suíte.
 - Cobertura: 2.746 de 3.001 linhas (91,5%), 630 de 798 ramificações (78,9%) e 88,9% na medida combinada. A medição inicial era 78,6% combinada, com 138 testes.
 - `makemigrations --check --dry-run`, `check`, verificação de produção com parâmetros locais de validação e `pip check` passaram.
 - Regressões corrigidas: consultas ao status de um resumo com falha reiniciavam a geração repetidamente; um resumo abandonado em execução não era recuperado; score infinito do provedor causava exceção; menu oculto após reduzir o desktop continuava acessível.
@@ -58,9 +58,11 @@ Um resumo com falha aguarda 15 minutos antes de uma nova tentativa automática. 
 
 Foram usados dados sintéticos em um espaço local identificado como **[TESTE] Densidade e regressões**, com títulos longos, 18 informativos, múltiplas fontes/tags e oito membros. As fontes de exemplo ficam desativadas. Os dados locais não fazem parte do repositório.
 
-Dashboard, informativos, fontes, tags, equipe, progresso, entrada e cadastro foram medidos nas larguras CSS de 320, 390, 768, 1024 e 1440 px: nenhuma página apresentou rolagem horizontal. A tabela de equipe conserva sua rolagem interna. O cabeçalho desktop passou de aproximadamente 113 para 57 px e os títulos de página de 30 para 24 px. O formulário de edição de acesso também foi conferido em tela pequena.
+Dashboard, informativos, fontes, tags, equipe, progresso, entrada e cadastro foram medidos nas larguras CSS de 320, 390, 768, 1024 e 1440 px: nenhuma página apresentou rolagem horizontal. A tabela de equipe conserva sua rolagem interna. O cabeçalho desktop passou de aproximadamente 113 para 57 px na primeira revisão de densidade; após a separação entre conta e equipe, ocupa cerca de 69 px no desktop e 65 px em 320/390 px. Os títulos de página passaram de 30 para 24 px. O formulário de edição de acesso também foi conferido em tela pequena.
 
 Interações verificadas: criar/editar/desativar fonte, abrir/cancelar exclusão, criar/editar tag e cor, pesquisar, filtrar por status, marcar leitura, acompanhar, selecionar/aplicar ação em lote, concluir coleta sem fontes ativas, navegar pelo menu, bloquear envio de alteração de acesso sem confirmação e usar Tab/Shift+Tab/Escape com retorno de foco no modal. A exclusão efetiva é exercitada no banco temporário dos testes. A transição desktop/celular foi revista com o estado de acessibilidade do menu. O console da sessão de regressão ficou sem erros e avisos.
+
+A revisão de identidade conferiu os painéis **Equipe atual** e **Minha conta** abertos nas cinco larguras, sem cortes laterais. Foram verificados ícone de pessoas no menu lateral, nome/e-mail/papel da conta, troca de equipe por clique e Tab/Enter preservando a pessoa conectada e alterando o acervo, fechamento por Escape com retorno de foco, clique externo e apenas um painel aberto por vez. Dois testes adicionais cobrem conta/equipe, vínculo inativo ou de outro usuário, papel diferente após a troca e equipe única. O cabeçalho não usa mais select ou botão separado para confirmar a troca.
 
 A extensão manteve a captura nativa em 1280 px. Para medir outras larguras no mesmo Chrome, foi usada uma moldura temporária com o portal real por proxy exclusivamente em loopback. A moldura preservou os fluxos e foi encerrada após a validação; as proteções contra enquadramento da aplicação permanecem ativas. A largura útil pode ser 15 px menor por causa da barra de rolagem. As telas públicas foram solicitadas sem cookie nessa prévia para preservar a sessão de trabalho. Isso verifica reflow CSS e interações, sem substituir testes em aparelhos físicos, zoom nativo, motores de outros navegadores ou leitor de tela real.
 

@@ -2,7 +2,9 @@
 
 Portal informativo que centraliza feeds RSS sobre informações fiscais, com contas, equipes e espaços de trabalho isolados.
 
-Cada cadastro cria um espaço privado. Administradores podem adicionar contas existentes à equipe pelo e-mail; somente membros ativos compartilham fontes, tags, notícias e análises daquele espaço. Leitura, acompanhamento e notificações são individuais. A troca de espaço fica no cabeçalho.
+Cada cadastro cria um espaço privado. Administradores podem adicionar contas existentes à equipe pelo e-mail; somente membros ativos compartilham fontes, tags, notícias e análises daquele espaço. Leitura, acompanhamento e notificações são individuais.
+
+No cabeçalho, **Equipe atual** identifica o acervo em uso. Clique para ver suas equipes e escolha outra: a troca muda o acervo sem trocar a conta conectada. **Minha conta**, com avatar e nome, mostra nome completo, e-mail, equipe atual, seu papel nessa equipe e a opção **Sair da conta**. Cada pessoa usa o próprio login; uma mesma conta pode participar de várias equipes, inclusive com papéis diferentes. “Equipe” na interface corresponde ao espaço de trabalho (`Workspace`) no código. O item **Gerenciar equipe**, com o ícone de pessoas, aparece para administradores da equipe atual.
 
 | Ação | Leitor | Editor | Administrador do espaço |
 | --- | --- | --- | --- |
@@ -107,7 +109,7 @@ O projeto estará disponível em `http://127.0.0.1:8000/`.
 
 As páginas incluem acesso direto ao conteúdo, foco visível, nomes acessíveis, avisos de estado e modais com contenção e retorno de foco. Menu e formulários se adaptam a telas menores; a tabela de equipe possui sua própria rolagem quando necessário.
 
-O layout usa espaçamentos compactos, títulos de página de 24 px e barra lateral de 244 px no desktop. Em telas pequenas, o cabeçalho ocupa duas linhas e acompanha a rolagem. Os filtros adicionais dos informativos ficam em **Fonte, status, relevância e vigência**; o painel permanece aberto quando há um desses filtros aplicado. O resumo original fica em **Resumo da fonte** quando difere do resumo da análise, evitando repetir o mesmo texto no card.
+O layout usa espaçamentos compactos, títulos de página de 24 px e barra lateral de 244 px no desktop. Em telas pequenas, o cabeçalho mantém menu, equipe e conta lado a lado e acompanha a rolagem. Os painéis de equipe/conta adaptam a largura, fecham com Escape ou clique externo e podem ser usados por teclado. Os filtros adicionais dos informativos ficam em **Fonte, status, relevância e vigência**; o painel permanece aberto quando há um desses filtros aplicado. O resumo original fica em **Resumo da fonte** quando difere do resumo da análise, evitando repetir o mesmo texto no card.
 
 Os arquivos CSS e o script global incluem `APP_VERSION` na URL. Atualize essa variável a cada versão publicada para invalidar o cache desses arquivos; a entrega e o cache dos estáticos importados devem ser configurados na INFRA.
 

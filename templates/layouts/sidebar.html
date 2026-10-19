@@ -56,7 +56,18 @@
                 </a>
             </li>
             {% endif %}
-            {% if can_manage_users %}<li><a href="{% url 'feeds:users' %}" class="nav-item {% if request.resolver_match.url_name == 'users' or request.resolver_match.url_name == 'edit_user' %}active{% endif %}" {% if request.resolver_match.url_name == 'users' or request.resolver_match.url_name == 'edit_user' %}aria-current="page"{% endif %}>Gerenciar equipe</a></li>{% endif %}
+            {% if can_manage_users %}
+            <li>
+                <a
+                    href="{% url 'feeds:users' %}"
+                    class="nav-item {% if request.resolver_match.url_name == 'users' or request.resolver_match.url_name == 'edit_user' %}active{% endif %}"
+                    {% if request.resolver_match.url_name == 'users' or request.resolver_match.url_name == 'edit_user' %}aria-current="page"{% endif %}
+                >
+                    <i data-lucide="users"></i>
+                    Gerenciar equipe
+                </a>
+            </li>
+            {% endif %}
         </ul>
     </nav>
 

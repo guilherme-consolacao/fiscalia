@@ -449,7 +449,7 @@
     flex-direction: row;
     gap: 8px;
     padding: 8px var(--page-gutter);
-    position: static;
+    position: relative;
   }
 
   .header-left { flex: 0 0 44px; }
