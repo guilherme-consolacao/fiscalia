@@ -21,7 +21,7 @@
 .form-group select,
 .form-group textarea {
   background-color: #fdfdfd;
-  border: 1px solid #dddddd;
+  border: 1px solid #718096;
   border-radius: 6px;
   box-sizing: border-box;
   font-size: 0.9rem;
@@ -33,3 +33,6 @@
   min-height: 60px;
   resize: vertical;
 }
+
+input::placeholder, textarea::placeholder { color: #5f6b7c; opacity: 1; }
+input[type="checkbox"], input[type="radio"] { accent-color: #355c37; }

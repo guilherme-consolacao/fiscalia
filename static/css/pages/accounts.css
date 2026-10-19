@@ -14,4 +14,16 @@
 .account-identity { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
 .account-identity form { display: inline; }
 .account-identity button { cursor: pointer; }
+.account-identity { justify-content: flex-end; max-width: 100%; min-width: 0; font-size: .875rem; }
+.account-identity > span { overflow-wrap: anywhere; }
+.account-identity form { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; min-width: 0; }
+.account-identity select { max-width: 15rem; min-width: 0; min-height: 44px; border: 1px solid #718096; border-radius: 6px; padding: .5rem; }
+.account-card input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
+@media (max-width: 640px) {
+  .account-identity { width: 100%; justify-content: flex-start; }
+  .account-identity > span { flex-basis: 100%; }
+  .account-identity form { flex: 1; }
+  .account-identity select { flex: 1; width: 100%; max-width: 100%; }
+  .account-identity .btn-portal { width: auto; }
+}
 @media (max-width: 480px) { .account-card { padding: 1.25rem; } }

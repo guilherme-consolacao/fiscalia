@@ -1,0 +1,13 @@
+.team-page { margin: 0 auto; max-width: 72rem; padding: clamp(20px, 3vw, 32px); width: 100%; }
+.team-page h1 { font-size: 1.875rem; margin-bottom: .75rem; overflow-wrap: anywhere; }
+.team-page > p { color: var(--text-muted); line-height: 1.6; max-width: 65ch; margin-bottom: 1.5rem; }
+.table-scroll { overflow-x: auto; margin-bottom: 2rem; border: 1px solid #718096; border-radius: .75rem; }
+.table-scroll:focus-visible { outline: 2px solid var(--focus-ring-outline); outline-offset: 3px; }
+.team-page table { width: 100%; border-collapse: collapse; text-align: left; font-size: .875rem; }
+.team-page caption { padding: 1rem; text-align: left; font-weight: 600; background: #f8fafc; }
+.team-page th, .team-page td { padding: 1rem; border-top: 1px solid var(--border-color); overflow-wrap: anywhere; }
+.team-page a { color: #355c37; text-underline-offset: .2em; }
+.team-page .account-card { max-width: 100%; box-shadow: none; }
+.team-page h2 { font-size: 1.25rem; margin-bottom: .75rem; }
+.team-page-edit { margin: 2rem auto; }
+@media (max-width: 640px) { .team-page th, .team-page td { padding: .75rem; min-width: 7rem; } }

@@ -399,7 +399,9 @@
 .header-right {
   align-items: center;
   display: flex;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 70%;
 }
 
 .page-content {
@@ -453,6 +455,7 @@
 
   .header-right {
     justify-content: stretch;
+    max-width: 100%;
   }
 
   .btn-portal {

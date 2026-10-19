@@ -42,3 +42,18 @@
   background-color: #e11d2e;
   color: #ffffff;
 }
+
+.btn-primary {
+  align-items: center;
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 10px 18px;
+}
+.btn-primary:hover { background: var(--primary-color-hover); }
+.btn-primary:disabled { cursor: wait; opacity: .8; }
