@@ -6,7 +6,7 @@
 <section class="team-page">
   <h1>Equipe de {{ request.workspace.name }}</h1>
   <p>Compartilhe o acervo deste espaço. Leitores consultam informativos; editores gerenciam fontes, tags e atualizações; administradores também gerenciam a equipe.</p>
-  {% if messages %}<ul class="feedback-messages" aria-live="polite">{% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
+  {% if messages %}<ul class="feedback-messages" aria-live="polite">{% for message in messages %}<li class="feedback-message {{ message.tags }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
   <div class="table-scroll" role="region" aria-label="Membros do espaço" tabindex="0">
   <table><caption>Pessoas com acesso ao espaço</caption><thead><tr><th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">Perfil</th><th scope="col">Estado</th><th scope="col">Ação</th></tr></thead>
   <tbody>{% for member in members %}<tr><th scope="row">{{ member.user.first_name|default:member.user.username }}</th><td>{{ member.user.email }}</td><td>{{ member.get_role_display }}</td><td>{% if member.active and member.user.is_active %}Ativo{% else %}Desativado{% endif %}</td><td><a href="{% url 'feeds:edit_user' member.pk %}">Editar acesso de {{ member.user.first_name|default:member.user.username }}</a></td></tr>{% empty %}<tr><td colspan="5">Nenhuma pessoa neste espaço.</td></tr>{% endfor %}</tbody></table>

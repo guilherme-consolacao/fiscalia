@@ -89,7 +89,18 @@
         activeModalState = {
             lastFocusedElement: triggerElement || document.activeElement,
             modal: modal,
+            inertedElements: [],
         };
+        var branch = modal;
+        while (branch.parentElement && branch.parentElement !== document.documentElement) {
+            Array.from(branch.parentElement.children).forEach(function (sibling) {
+                if (sibling !== branch && !sibling.inert) {
+                    sibling.inert = true;
+                    activeModalState.inertedElements.push(sibling);
+                }
+            });
+            branch = branch.parentElement;
+        }
         updateScrollLock();
         focusModal(modal);
     }
@@ -105,6 +116,7 @@
         modal.hidden = true;
 
         if (activeModalState && activeModalState.modal === modal) {
+            activeModalState.inertedElements.forEach(function (element) { element.inert = false; });
             activeModalState = null;
         }
 
@@ -127,6 +139,7 @@
 
         if (sidebar) {
             sidebar.setAttribute('aria-hidden', isDesktopSidebar() ? 'false' : String(!sidebarState.open));
+            sidebar.inert = !isOpen;
         }
 
         if (toggle) {
@@ -138,6 +151,8 @@
         }
 
         document.body.classList.toggle('sidebar-open', sidebarState.open);
+        var main = document.getElementById('main-content');
+        if (main && !activeModalState) { main.inert = sidebarState.open && !isDesktopSidebar(); }
         updateScrollLock();
         return isOpen;
     }
@@ -217,6 +232,8 @@
         var container = getOrCreateToastContainer();
         var toast = document.createElement('div');
         toast.className = 'toast ' + type;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-atomic', 'true');
 
         var iconSvg = '';
         if (type === 'success') {
@@ -225,7 +242,11 @@
             iconSvg = '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
         }
 
-        toast.innerHTML = iconSvg + '<div class="toast-content">' + message + '</div>';
+        toast.innerHTML = iconSvg;
+        var content = document.createElement('div');
+        content.className = 'toast-content';
+        content.textContent = message;
+        toast.appendChild(content);
         container.appendChild(toast);
 
         window.setTimeout(function () {
@@ -271,7 +292,7 @@
             showToast(message.textContent.trim(), type);
         });
 
-        messagesContainer.style.display = 'none';
+        if (!messagesContainer.querySelector('.error')) { messagesContainer.style.display = 'none'; }
     }
 
     function getOrCreateEffectiveRemindersContainer() {
