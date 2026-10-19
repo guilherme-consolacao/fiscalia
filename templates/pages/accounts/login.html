@@ -2,6 +2,7 @@
 {% block content %}
 <h1>Entre no seu espaço</h1>
 <p>Acompanhe os informativos fiscais com sua equipe.</p>
+{% if rate_limit_message %}<p role="alert" class="errorlist">{{ rate_limit_message }}</p>{% endif %}
 <form method="post" data-account-form>
   {% csrf_token %}
   {{ form.as_div }}

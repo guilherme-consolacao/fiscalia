@@ -165,7 +165,7 @@ def _run_dashboard_weekly_summary_job(summary_id, expected_revision):
         _persist_summary_failure(summary_id, expected_revision, str(error))
     except Exception as error:  # pragma: no cover - proteção adicional
         logger.exception('Falha inesperada ao gerar resumo semanal %s', summary_id)
-        _persist_summary_failure(summary_id, expected_revision, str(error))
+        _persist_summary_failure(summary_id, expected_revision, 'Falha inesperada ao gerar o resumo. Tente novamente mais tarde.')
     finally:
         close_old_connections()
 

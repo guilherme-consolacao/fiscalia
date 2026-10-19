@@ -266,7 +266,7 @@ def _mark_job_failed(job_id, error):
         current_stage=NewsImportJob.STAGE_FAILED,
         stage_title='Atualização interrompida',
         stage_message='Ocorreu uma falha inesperada ao processar a atualização dos informativos.',
-        error_message=str(error),
+        error_message='Falha inesperada na atualização. Consulte os registros do servidor.',
         result_messages=[
             {
                 'level': 'error',

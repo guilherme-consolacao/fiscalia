@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 from feeds.forms.accounts import LoginForm, SignupForm
 from feeds.models import Workspace, Membership
+from feeds.services.auth_rate_limit import allow_auth_attempt
 
 
 class PortalLoginView(LoginView):
@@ -13,11 +14,21 @@ class PortalLoginView(LoginView):
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
+    def post(self, request, *args, **kwargs):
+        if not allow_auth_attempt(request, 'login', 10, 900):
+            form = self.authentication_form(request=request)
+            response = self.render_to_response(self.get_context_data(form=form, rate_limit_message='Muitas tentativas de entrada. Aguarde 15 minutos e tente novamente.'), status=429)
+            response['Retry-After'] = '900'
+            return response
+        return super().post(request, *args, **kwargs)
+
 
 def signup(request):
     if request.user.is_authenticated:
         return redirect('feeds:index')
     form = SignupForm(request.POST or None)
+    if request.method == 'POST' and not allow_auth_attempt(request, 'signup', 10, 3600):
+        return render(request, 'pages/accounts/signup.html', {'form': SignupForm(), 'rate_limit_message':'Muitas tentativas de cadastro. Tente novamente em uma hora.'}, status=429)
     if request.method == 'POST' and form.is_valid():
         try:
             with transaction.atomic():

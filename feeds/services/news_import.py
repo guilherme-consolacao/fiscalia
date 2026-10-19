@@ -213,7 +213,7 @@ def import_news_items(timeout=15, progress_callback=None):
             _register_error(result, source, _describe_feed_fetch_error(error))
         except Exception as error:  # pragma: no cover - proteção extra para feeds inválidos
             logger.exception('Erro inesperado ao importar feed %s', source.url)
-            _register_error(result, source, f'erro inesperado: {error}')
+            _register_error(result, source, 'erro inesperado ao processar a fonte; tente novamente mais tarde')
 
         if progress_callback is not None:
             progress_callback(

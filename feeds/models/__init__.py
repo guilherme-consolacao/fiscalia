@@ -9,8 +9,10 @@ from .source_category import SourceCategory
 from .tag import Tag
 from .workspace import Workspace, Membership
 from .news_item_read import NewsItemRead
+from .auth_rate_limit import AuthRateLimit
 
 __all__ = [
+    'AuthRateLimit',
     'DashboardWeeklySummary',
     'NewsItemFollow',
     'NewsItem',
@@ -20,4 +22,7 @@ __all__ = [
     'Source',
     'SourceCategory',
     'Tag',
+    'Workspace',
+    'Membership',
+    'NewsItemRead',
 ]

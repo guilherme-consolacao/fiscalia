@@ -30,10 +30,10 @@ class WorkspaceManager(models.Manager):
     def get_queryset(self):
         queryset = super().get_queryset()
         workspace_id = _workspace_id.get()
-        if workspace_id is not None:
-            lookup = getattr(self.model, 'workspace_lookup', 'workspace_id')
-            queryset = queryset.filter(**{lookup: workspace_id})
-        return queryset
+        if workspace_id is None:
+            return queryset.none()
+        lookup = getattr(self.model, 'workspace_lookup', 'workspace_id')
+        return queryset.filter(**{lookup: workspace_id})
 
 
 class PersonalManager(WorkspaceManager):

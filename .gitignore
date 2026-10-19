@@ -13,4 +13,5 @@ db.sqlite3
 graphify-out/cache/
 graphify-out/.*
 graphify-out/*.py
+graphify-out/manifest.json
 *.sqlite3

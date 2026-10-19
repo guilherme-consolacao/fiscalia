@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from feeds.models import NewsItem, NewsItemAnalysis, Source, SourceCategory, Tag
+from feeds.services import news_import
 from feeds.tests.test_news import (
     DummyJsonResponse,
     DummyResponse,
@@ -29,6 +30,14 @@ class NewsAnalysisTests(TestCase):
     def setUp(self):
         self.client.defaults['HTTP_X_FISCALIA_SYNC_IMPORT'] = '1'
         Source.objects.update(active=False)
+        # RSS and article extraction use the same test responder; neither may
+        # resolve DNS or reach the network during provider contract tests.
+        article_fetch = patch(
+            'feeds.services.news_analysis.fetch_url',
+            side_effect=lambda *args, **kwargs: news_import.fetch_url(*args, **kwargs),
+        )
+        article_fetch.start()
+        self.addCleanup(article_fetch.stop)
 
     def _create_source(self, name='Fonte IA', url='https://example.com/ia/rss'):
         return Source.objects.create(
@@ -621,7 +630,7 @@ class NewsAnalysisTests(TestCase):
                 ),
             ),
         ):
-            call_command('backfill_news_analysis', stdout=output)
+            call_command('backfill_news_analysis', workspace=1, stdout=output)
 
         analysis = NewsItemAnalysis.objects.get(news_item=news_item)
         self.assertEqual(analysis.status, NewsItemAnalysis.STATUS_COMPLETED)

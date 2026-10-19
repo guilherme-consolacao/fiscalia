@@ -1,15 +1,28 @@
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 
-from feeds.models import NewsItem, NewsItemAnalysis
+from feeds.models import NewsItem, NewsItemAnalysis, Workspace
+from feeds.tenancy import workspace_scope
 from feeds.services.news_analysis import build_news_analysis_service
 
 
 class Command(BaseCommand):
     help = 'Executa backfill da análise de IA para informativos antigos ou pendentes.'
 
+    def add_arguments(self, parser):
+        parser.add_argument('--workspace', type=int, required=True)
+        parser.add_argument('--limit', type=int, default=0, help='Limita notícias processadas; zero processa todas as pendentes do espaço.')
+
     def handle(self, *args, **options):
+        if not Workspace.objects.filter(pk=options['workspace']).exists():
+            raise CommandError('Espaço não encontrado.')
+        if options['limit'] < 0:
+            raise CommandError('--limit deve ser zero ou positivo.')
+        with workspace_scope(options['workspace']):
+            self._handle_scoped(options['limit'])
+
+    def _handle_scoped(self, limit):
         service, warning_message = build_news_analysis_service()
         if service is None:
             if warning_message:
@@ -24,7 +37,7 @@ class Command(BaseCommand):
             | ~Q(analysis__pipeline_version=settings.NEWS_AI['PIPELINE_VERSION'])
         )
 
-        pending_news_items = list(queryset)
+        pending_news_items = list(queryset[:limit] if limit else queryset)
         processed_count = 0
         failed_count = 0
         halted_message = ''

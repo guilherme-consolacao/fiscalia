@@ -292,7 +292,10 @@ def effective_date_reminders(request):
 @require_POST
 def dismiss_effective_date_reminder(request):
     payload = _payload_from_request(request)
-    reminder_id = payload.get('notification_id')
+    try:
+        reminder_id = int(payload.get('notification_id', ''))
+    except (TypeError, ValueError):
+        return JsonResponse({'ok': False, 'message': 'Notificação inválida.'}, status=400)
     reminder = get_object_or_404(NewsItemReminderNotification, pk=reminder_id)
     reminder.dismissed_at = timezone.now()
     reminder.save(update_fields=['dismissed_at', 'updated_at'])
@@ -356,9 +359,16 @@ def _filters_from_query(request):
         'sort': selected_sort,
         'effective_date_from_raw': selected_effective_date_from,
         'effective_date_to_raw': selected_effective_date_to,
-        'effective_date_from': parse_date(selected_effective_date_from) if selected_effective_date_from else None,
-        'effective_date_to': parse_date(selected_effective_date_to) if selected_effective_date_to else None,
+        'effective_date_from': _safe_date(selected_effective_date_from),
+        'effective_date_to': _safe_date(selected_effective_date_to),
     }
+
+
+def _safe_date(value):
+    try:
+        return parse_date(value) if value else None
+    except ValueError:
+        return None
 
 
 def _redirect_with_filters(request):
@@ -603,7 +613,8 @@ def _payload_from_request(request):
     if (request.content_type or '').startswith('application/json'):
         try:
             raw_body = request.body.decode('utf-8') if request.body else '{}'
-            return json.loads(raw_body)
+            payload = json.loads(raw_body)
+            return payload if isinstance(payload, dict) else {}
         except (UnicodeDecodeError, json.JSONDecodeError):
             return {}
 

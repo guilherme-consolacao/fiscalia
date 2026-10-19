@@ -30,7 +30,7 @@ class WorkspaceIsolationTests(TestCase):
 
     def test_source_cannot_be_attached_to_another_workspace(self):
         workspace = Workspace.objects.create(name='Isolado')
-        source = Source.objects.first()
+        source = Source.all_objects.first()
         with workspace_scope(workspace.pk):
             with self.assertRaises(ValidationError):
                 NewsItem.objects.create(source=source, title='Falha', link='https://example.com', dedupe_key='cross')

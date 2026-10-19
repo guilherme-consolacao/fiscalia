@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponseBadRequest
 from django.views.decorators.http import require_POST
 from feeds.forms.users import AddMemberForm, EditMemberForm
 from feeds.models import Membership, Workspace
@@ -45,6 +46,10 @@ def edit(request, membership_id):
 
 @require_POST
 def switch_workspace(request):
-    member = get_object_or_404(Membership, user=request.user, active=True, workspace_id=request.POST.get('workspace_id'))
+    try:
+        workspace_id = int(request.POST.get('workspace_id', ''))
+    except (ValueError, TypeError):
+        return HttpResponseBadRequest('Selecione um espaço válido.')
+    member = get_object_or_404(Membership, user=request.user, active=True, workspace_id=workspace_id)
     request.session['workspace_id'] = member.workspace_id
     return redirect('feeds:index')
