@@ -6,6 +6,8 @@ from feeds.services.dashboard_weekly_summary import get_current_week_range
 
 
 def sidebar_context(request):
+    if not request.user.is_authenticated or not getattr(request, 'workspace', None):
+        return {}
     total_news = NewsItem.objects.count()
     unread_count = NewsItem.objects.filter(is_read=False).count()
     high_relevance_count = NewsItemAnalysis.objects.filter(

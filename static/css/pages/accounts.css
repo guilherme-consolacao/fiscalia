@@ -1,0 +1,17 @@
+.account-page { display: grid; place-items: center; padding: 2rem 1rem; }
+.account-card { width: min(100%, 34rem); background: var(--card-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-soft); }
+.account-brand { display: block; font-size: 1.6rem; color: var(--primary-color); font-weight: 700; text-decoration: none; margin-bottom: 1.5rem; }
+.account-card h1 { font-size: 1.7rem; margin-bottom: .75rem; }
+.account-card p { line-height: 1.6; margin-bottom: 1rem; }
+.account-card form > div { margin-block: 1.2rem; }
+.account-card label { display: block; font-weight: 600; margin-bottom: .5rem; }
+.account-card input, .account-card select { width: 100%; padding: .8rem; border: 1px solid #718096; border-radius: .5rem; font: inherit; }
+.account-card .helptext { color: #4b5563; font-size: .875rem; line-height: 1.5; }
+.account-card ul { padding-left: 1.25rem; }
+.account-card a { color: #355c37; text-underline-offset: .2em; }
+.errorlist { color: #991b1b; padding: .5rem 1.2rem; background: #fff1f2; border-radius: .4rem; }
+.account-card button[type="submit"] { width: 100%; min-height: 44px; justify-content: center; margin-bottom: 1rem; }
+.account-identity { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.account-identity form { display: inline; }
+.account-identity button { cursor: pointer; }
+@media (max-width: 480px) { .account-card { padding: 1.25rem; } }

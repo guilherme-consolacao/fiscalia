@@ -1,0 +1,13 @@
+{% extends 'pages/accounts/base.html' %}
+{% block title %}Criar conta{% endblock %}
+{% block content %}
+<h1>Crie seu espaço no Fiscalia</h1>
+<p>Comece com um espaço privado. Você poderá compartilhar o acervo com sua equipe.</p>
+<form method="post" data-account-form>
+  {% csrf_token %}
+  {{ form.as_div }}
+  <button class="btn-primary" type="submit" data-submit-label="Criando conta…">Criar conta</button>
+  <p role="status" data-submit-status></p>
+</form>
+<p>Já tem uma conta? <a href="{% url 'feeds:login' %}">Entrar</a></p>
+{% endblock %}

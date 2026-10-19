@@ -1,10 +1,14 @@
 from django.urls import path
 
-from .views import api, dashboard, news, sources, tags
+from .views import api, dashboard, news, sources, tags, accounts
 
 app_name = 'feeds'
 
 urlpatterns = [
+    path('entrar/', accounts.PortalLoginView.as_view(), name='login'),
+    path('cadastrar/', accounts.signup, name='signup'),
+    path('sair/', accounts.signout, name='logout'),
+    path('sem-acesso/', accounts.no_workspace, name='no_workspace'),
     path('', dashboard.index, name='index'),
     path('dashboard/resumo-semanal/status/', dashboard.weekly_summary_status, name='dashboard_weekly_summary_status'),
 

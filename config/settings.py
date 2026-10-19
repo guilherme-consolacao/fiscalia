@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'feeds.middleware.WorkspaceMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -138,6 +139,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 APP_VERSION = env('APP_VERSION')
+LOGIN_URL = 'feeds:login'
+LOGIN_REDIRECT_URL = 'feeds:index'
+SESSION_COOKIE_AGE = env.int('SESSION_COOKIE_AGE', default=28800)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 NEWS_AI = {
     'ENABLED': env('NEWS_AI_ENABLED'),

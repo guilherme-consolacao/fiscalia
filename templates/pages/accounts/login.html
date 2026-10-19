@@ -1,0 +1,13 @@
+{% extends 'pages/accounts/base.html' %}
+{% block content %}
+<h1>Entre no seu espaço</h1>
+<p>Acompanhe os informativos fiscais com sua equipe.</p>
+<form method="post" data-account-form>
+  {% csrf_token %}
+  {{ form.as_div }}
+  <input type="hidden" name="next" value="{{ next }}">
+  <button class="btn-primary" type="submit" data-submit-label="Entrando…">Entrar</button>
+  <p role="status" data-submit-status></p>
+</form>
+<p>Ainda não tem uma conta? <a href="{% url 'feeds:signup' %}">Criar conta</a></p>
+{% endblock %}

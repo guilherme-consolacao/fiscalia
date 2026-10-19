@@ -1,0 +1,7 @@
+{% extends 'pages/accounts/base.html' %}
+{% block title %}Acesso indisponível{% endblock %}
+{% block content %}
+<h1>Seu acesso está desativado</h1>
+<p>Peça ao administrador do seu espaço para reativar sua associação.</p>
+<form method="post" action="{% url 'feeds:logout' %}">{% csrf_token %}<button type="submit" class="btn-primary">Sair</button></form>
+{% endblock %}

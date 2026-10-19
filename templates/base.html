@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pages/accounts.css' %}">
     {% block styles %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -38,7 +39,12 @@
                     {% block header_badge %}<span class="badge-new">7 novas</span>{% endblock %}
                 </div>
                 <div class="header-right">
-                    <a href="#" class="btn-portal">PORTAL PÚBLICO</a>
+                    {% if user.is_authenticated %}
+                    <div class="account-identity">
+                        <span>{{ user.first_name|default:user.username }} · {{ request.workspace.name }}</span>
+                        <form method="post" action="{% url 'feeds:logout' %}">{% csrf_token %}<button type="submit" class="btn-portal">Sair</button></form>
+                    </div>
+                    {% endif %}
                 </div>
             </header>
 

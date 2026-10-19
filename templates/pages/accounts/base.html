@@ -1,0 +1,19 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Entrar{% endblock %} | Fiscalia</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/pages/accounts.css' %}">
+</head>
+<body class="account-page">
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+  <main id="main-content" class="account-card" tabindex="-1">
+    <a class="account-brand" href="{% url 'feeds:login' %}">Fiscalia</a>
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{% static 'js/pages/accounts.js' %}"></script>
+</body>
+</html>
