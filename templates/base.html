@@ -56,6 +56,7 @@
             <div class="page-content">
                 {% block content %}{% endblock %}
             </div>
+            {% include 'layouts/libras.html' %}
         </main>
     </div>
 
@@ -67,6 +68,7 @@
     ></div>
 
     <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/libras.js' %}"></script>
     {% block scripts %}{% endblock %}
 </body>
 
