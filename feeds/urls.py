@@ -1,10 +1,13 @@
 from django.urls import path
 
-from .views import api, dashboard, news, sources, tags, accounts
+from .views import api, dashboard, news, sources, tags, accounts, users
 
 app_name = 'feeds'
 
 urlpatterns = [
+    path('equipe/', users.index, name='users'),
+    path('equipe/<int:membership_id>/editar/', users.edit, name='edit_user'),
+    path('espacos/alternar/', users.switch_workspace, name='switch_workspace'),
     path('entrar/', accounts.PortalLoginView.as_view(), name='login'),
     path('cadastrar/', accounts.signup, name='signup'),
     path('sair/', accounts.signout, name='logout'),

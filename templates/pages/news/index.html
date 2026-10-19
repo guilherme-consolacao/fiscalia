@@ -15,7 +15,7 @@
             <p class="news-subtitle">Acompanhe as notícias importadas dos feeds RSS cadastrados e monitore o que ainda precisa ser lido.</p>
         </div>
 
-        <form id="form-news-refresh" method="post" action="{% url 'feeds:refresh_news' %}" class="news-refresh-form">
+        {% if can_manage_content %}<form id="form-news-refresh" method="post" action="{% url 'feeds:refresh_news' %}" class="news-refresh-form">
             {% csrf_token %}
             <input type="hidden" name="q" value="{{ selected_query }}">
             <input type="hidden" name="source" value="{{ selected_source }}">
@@ -28,7 +28,7 @@
                 <i data-lucide="refresh-cw"></i>
                 <span>Atualizar</span>
             </button>
-        </form>
+        </form>{% endif %}
     </div>
 
     {% if messages %}

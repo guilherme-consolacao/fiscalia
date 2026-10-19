@@ -5,9 +5,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from feeds.models import Source, SourceCategory, Tag
+from feeds.permissions import editor_required
 from feeds.services.dashboard_weekly_summary import invalidate_current_week_summary
 
 
+@editor_required
 def index(request):
     context = {
         'sources': Source.objects.select_related('category').prefetch_related('tags'),
@@ -19,6 +21,7 @@ def index(request):
 
 
 @require_POST
+@editor_required
 def create_source(request):
     source_data = _source_payload_from_request(request)
 
@@ -49,6 +52,7 @@ def create_source(request):
 
 
 @require_POST
+@editor_required
 def update_source(request, source_id):
     source_data = _source_payload_from_request(request)
 
@@ -79,6 +83,7 @@ def update_source(request, source_id):
 
 
 @require_POST
+@editor_required
 def delete_source(request, source_id):
     source = get_object_or_404(Source, pk=source_id)
     name = source.name
@@ -90,6 +95,7 @@ def delete_source(request, source_id):
 
 
 @require_POST
+@editor_required
 def toggle_source_status(request, source_id):
     source = get_object_or_404(Source, pk=source_id)
     active = request.POST.get('active') == 'on'

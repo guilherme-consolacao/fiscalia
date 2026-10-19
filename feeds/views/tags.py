@@ -7,8 +7,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from feeds.models import Tag
+from feeds.permissions import editor_required
 
 
+@editor_required
 def index(request):
     context = {
         'tags': Tag.objects.all(),
@@ -18,6 +20,7 @@ def index(request):
 
 
 @require_POST
+@editor_required
 def create_tag(request):
     tag_data = _tag_payload_from_request(request)
     is_valid, error_message = _tag_payload_is_valid(tag_data)
@@ -38,6 +41,7 @@ def create_tag(request):
 
 
 @require_POST
+@editor_required
 def update_tag(request, tag_id):
     tag_data = _tag_payload_from_request(request)
     is_valid, error_message = _tag_payload_is_valid(tag_data)
@@ -58,6 +62,7 @@ def update_tag(request, tag_id):
 
 
 @require_POST
+@editor_required
 def delete_tag(request, tag_id):
     tag = get_object_or_404(Tag, pk=tag_id)
     name = tag.name

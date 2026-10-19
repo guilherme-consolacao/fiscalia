@@ -21,6 +21,7 @@ from feeds.models import (
     Source,
 )
 from feeds.services.news_import_jobs import run_news_import_job, start_news_import_job
+from feeds.permissions import editor_required
 
 STATUS_ALL = 'all'
 STATUS_READ = 'read'
@@ -119,6 +120,7 @@ def index(request):
 
 
 @require_POST
+@editor_required
 def refresh_news(request):
     job = NewsImportJob.objects.create(
         redirect_query=request.POST.get('q', '').strip(),
@@ -138,6 +140,7 @@ def refresh_news(request):
     return redirect('feeds:refresh_news_progress', job_id=job.id)
 
 
+@editor_required
 def refresh_news_progress(request, job_id):
     job = get_object_or_404(NewsImportJob, pk=job_id)
     context = {
@@ -149,11 +152,13 @@ def refresh_news_progress(request, job_id):
     return render(request, 'pages/news/import_progress.html', context)
 
 
+@editor_required
 def refresh_news_progress_status(request, job_id):
     job = get_object_or_404(NewsImportJob, pk=job_id)
     return JsonResponse(_job_payload(job))
 
 
+@editor_required
 def finalize_refresh_news_job(request, job_id):
     job = get_object_or_404(NewsImportJob, pk=job_id)
 

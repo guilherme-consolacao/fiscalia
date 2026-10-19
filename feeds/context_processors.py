@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import reverse
 
-from feeds.models import DashboardWeeklySummary, NewsImportJob, NewsItem, NewsItemAnalysis, Source
+from feeds.models import DashboardWeeklySummary, NewsImportJob, NewsItem, NewsItemAnalysis, Source, Membership
 from feeds.services.dashboard_weekly_summary import get_current_week_range
 
 
@@ -39,6 +39,9 @@ def sidebar_context(request):
     network_status = _build_network_status(active_sources, total_sources, current_summary)
 
     return {
+        'can_manage_content': request.membership.role in {Membership.ADMIN, Membership.EDITOR},
+        'can_manage_users': request.membership.role == Membership.ADMIN,
+        'available_memberships': Membership.objects.filter(user=request.user, active=True).select_related('workspace'),
         'sidebar_app_version': getattr(settings, 'APP_VERSION', '2.4.0'),
         'sidebar_assistant_slides': slides,
         'sidebar_network_status': network_status,

@@ -10,6 +10,11 @@ class LoginForm(AuthenticationForm):
         value = self.cleaned_data['username'].strip()
         return value.casefold() if '@' in value else value
 
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)
+        if not user.memberships.filter(active=True).exists():
+            raise forms.ValidationError('Esta conta está sem acesso ativo. Fale com o administrador do seu espaço.', code='inactive')
+
 
 class SignupForm(UserCreationForm):
     first_name = forms.CharField(label='Nome', max_length=150)

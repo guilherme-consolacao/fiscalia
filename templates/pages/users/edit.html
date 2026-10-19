@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Editar acesso | Fiscalia{% endblock %}
+{% block header_title %}Equipe{% endblock %}
+{% block header_badge %}{% endblock %}
+{% block content %}
+<section class="account-card"><h1>Editar acesso</h1><p>{{ member.user.first_name|default:member.user.username }} · {{ member.user.email }}</p><p>As alterações afetam apenas {{ request.workspace.name }} e valem imediatamente.</p><form method="post" data-account-form>{% csrf_token %}{{ form.as_div }}<button type="submit" class="btn-primary" data-submit-label="Salvando…">Salvar acesso</button><p role="status" data-submit-status></p></form><a href="{% url 'feeds:users' %}">Voltar à equipe</a></section>
+{% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'js/pages/accounts.js' %}"></script>{% endblock %}
