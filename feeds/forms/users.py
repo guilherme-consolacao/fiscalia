@@ -4,8 +4,8 @@ from feeds.models import Membership
 
 
 class AddMemberForm(forms.Form):
-    email = forms.EmailField(label='E-mail da conta existente', max_length=150)
-    role = forms.ChoiceField(label='Perfil no espaço', choices=Membership.ROLE_CHOICES, initial=Membership.READER)
+    email = forms.EmailField(label='E-mail da conta existente', max_length=150, help_text='Use o mesmo e-mail que a pessoa cadastrou no Fiscalia.')
+    role = forms.ChoiceField(label='Papel nesta equipe', choices=Membership.ROLE_CHOICES, initial=Membership.READER, help_text='A permissão escolhida vale somente para a equipe atual.')
 
     def clean_email(self):
         email = self.cleaned_data['email'].strip().casefold()
@@ -22,3 +22,5 @@ class EditMemberForm(forms.ModelForm):
     class Meta:
         model = Membership
         fields = ['role', 'active']
+        labels = {'role': 'Papel nesta equipe', 'active': 'Acesso ativo nesta equipe'}
+        help_texts = {'active': 'Desativar este acesso não desativa a conta nem o acesso às outras equipes.'}

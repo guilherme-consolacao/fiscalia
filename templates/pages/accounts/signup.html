@@ -1,14 +1,27 @@
 {% extends 'pages/accounts/base.html' %}
 {% block title %}Criar conta{% endblock %}
 {% block content %}
-<h1>Crie seu espaço no Fiscalia</h1>
-<p>Comece com um espaço privado. Você poderá compartilhar o acervo com sua equipe.</p>
+<h1>Crie sua conta no Fiscalia</h1>
+<p>Cada pessoa entra com o próprio e-mail e senha. A mesma conta pode participar de uma ou mais equipes.</p>
 {% if rate_limit_message %}<p role="alert" class="errorlist">{{ rate_limit_message }}</p>{% endif %}
 <form method="post" data-account-form>
   {% csrf_token %}
-  {{ form.as_div }}
+  {{ form.non_field_errors }}
+  <fieldset class="account-fields">
+    <legend>Sua conta pessoal</legend>
+    <div>{{ form.first_name.as_field_group }}</div>
+    <div>{{ form.email.as_field_group }}</div>
+    <div>{{ form.password1.as_field_group }}</div>
+    <div>{{ form.password2.as_field_group }}</div>
+  </fieldset>
+  <fieldset class="account-fields" aria-describedby="initial-team-help">
+    <legend>Sua equipe inicial</legend>
+    <p class="helptext" id="initial-team-help">O cadastro cria sua primeira equipe. Depois, um administrador pode adicionar seu e-mail a outras equipes.</p>
+    <div>{{ form.workspace_name.as_field_group }}</div>
+  </fieldset>
   <button class="btn-primary" type="submit" data-submit-label="Criando conta…">Criar conta</button>
   <p role="status" data-submit-status></p>
 </form>
-<p>Já tem uma conta? <a href="{% url 'feeds:login' %}">Entrar</a></p>
+<p class="helptext">Já tem conta e vai participar de outra equipe? Peça ao administrador para adicionar seu e-mail cadastrado.</p>
+<p>Já tem uma conta? <a href="{% url 'feeds:login' %}">Entrar na minha conta</a></p>
 {% endblock %}

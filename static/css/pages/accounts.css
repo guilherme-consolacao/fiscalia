@@ -4,6 +4,10 @@
 .account-card h1 { font-size: 1.375rem; margin-bottom: .75rem; }
 .account-card p { line-height: 1.6; margin-bottom: 1rem; }
 .account-card form > div { margin-block: .75rem; }
+.account-fields { border: 0; min-width: 0; padding: 0; margin: 0 0 1.25rem; }
+.account-fields legend { font-size: .875rem; font-weight: 700; margin-bottom: .5rem; }
+.account-fields > div { margin-block: .75rem; }
+.account-fields > p.helptext { margin-bottom: .75rem; }
 .account-card label { display: block; font-weight: 600; margin-bottom: .5rem; }
 .account-card input, .account-card select { width: 100%; padding: .625rem; border: 1px solid #718096; border-radius: .5rem; font: inherit; }
 .account-card .helptext { color: #4b5563; font-size: .875rem; line-height: 1.5; }

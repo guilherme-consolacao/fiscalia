@@ -17,9 +17,9 @@ class LoginForm(AuthenticationForm):
 
 
 class SignupForm(UserCreationForm):
-    first_name = forms.CharField(label='Nome', max_length=150)
-    email = forms.EmailField(label='E-mail', max_length=150, widget=forms.EmailInput(attrs={'autocomplete': 'email'}))
-    workspace_name = forms.CharField(label='Nome do espaço de trabalho', max_length=120)
+    first_name = forms.CharField(label='Seu nome', max_length=150, widget=forms.TextInput(attrs={'autocomplete': 'given-name'}))
+    email = forms.EmailField(label='Seu e-mail', max_length=150, help_text='Você usará este e-mail para entrar em todas as suas equipes.', widget=forms.EmailInput(attrs={'autocomplete': 'email'}))
+    workspace_name = forms.CharField(label='Nome da equipe inicial', max_length=120, help_text='Esta equipe começa privada, com você como administrador.')
 
     class Meta:
         model = get_user_model()

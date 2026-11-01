@@ -54,3 +54,17 @@ class MembershipTests(TestCase):
         self.client.force_login(self.reader)
         self.assertEqual(self.client.post(reverse('feeds:switch_workspace'),{'workspace_id':self.other.pk}).status_code,302)
         self.assertContains(self.client.get('/'),'Grupo dois')
+
+    def test_team_list_distinguishes_own_account_membership_and_account_status(self):
+        self.client.force_login(self.admin)
+        self.reader_access.active = False
+        self.reader_access.save(update_fields=['active'])
+        disabled = get_user_model().objects.create_user(username='disabled@example.com', email='disabled@example.com', is_active=False)
+        Membership.objects.create(workspace=self.space, user=disabled)
+        response = self.client.get(reverse('feeds:users'))
+        self.assertContains(response, 'Você', count=1)
+        self.assertContains(response, self.admin.email)
+        self.assertContains(response, 'Acesso ativo')
+        self.assertContains(response, 'Acesso desativado')
+        self.assertContains(response, 'Conta desativada')
+        self.assertNotContains(response, self.other.name)

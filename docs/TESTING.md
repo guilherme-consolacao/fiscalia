@@ -66,6 +66,14 @@ A revisão de identidade conferiu os painéis **Equipe atual** e **Minha conta**
 
 A extensão manteve a captura nativa em 1280 px. Para medir outras larguras no mesmo Chrome, foi usada uma moldura temporária com o portal real por proxy exclusivamente em loopback. A moldura preservou os fluxos e foi encerrada após a validação; as proteções contra enquadramento da aplicação permanecem ativas. A largura útil pode ser 15 px menor por causa da barra de rolagem. As telas públicas foram solicitadas sem cookie nessa prévia para preservar a sessão de trabalho. Isso verifica reflow CSS e interações, sem substituir testes em aparelhos físicos, zoom nativo, motores de outros navegadores ou leitor de tela real.
 
+## Revisão de cadastro e equipe em 01/11/2026
+
+O cadastro separa **Sua conta pessoal** de **Sua equipe inicial**. Os rótulos e as instruções explicam o login individual, a primeira equipe privada e a inclusão em outras equipes pelo mesmo e-mail. Gerenciar equipe reúne nome/e-mail da conta, marca **Você**, identifica a equipe atual e diferencia papel, acesso ao vínculo e conta desativada. A edição esclarece o efeito limitado à equipe atual.
+
+A suíte completa passou com **219 testes**, sem chamadas pagas de IA. Os dois testes adicionais verificam cadastro seguido de inclusão em outra equipe sem alterar identidade ou senha e a distinção entre conta inativa e participação desativada na lista. `makemigrations --check --dry-run` não encontrou alterações.
+
+Os fluxos funcionais conferidos foram cadastro inválido com confirmação de senha diferente, cadastro válido com equipe privada, rejeição de conta inexistente, inclusão de conta de teste existente, descrição dos papéis e desativação de um vínculo. Após corrigir a seleção do perfil do Chrome, foram reconferidos no segundo perfil o cadastro, o login individual, a listagem e a edição de acesso. Cadastro e listagem foram medidos nesse perfil em 320, 390, 768 e 1440 px sem rolagem horizontal da página; a tabela mantém rolagem própria. A edição de acesso foi conferida em 320 px. A extensão exigiu reconexão e substituição de abas durante a validação. Foram usados apenas dados sintéticos locais; não foram adicionadas dependências, migrações ou convites por e-mail.
+
 ## Limites e próxima liberação
 
 Cobertura não prova ausência de defeitos nem corresponde a todas as combinações de entradas. O contrato da API de IA foi simulado; um smoke test pago deve ser pequeno e deliberado ao habilitar o serviço. O VLibras depende de rede e serviço externo; sua validação e tratamento de indisponibilidade estão registrados em [SECURITY.md](SECURITY.md).

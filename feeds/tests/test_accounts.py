@@ -39,3 +39,30 @@ class AccountTests(TestCase):
         Membership.objects.filter(user_id=first_id).update(active=False)
         self.assertRedirects(self.client.get('/'), reverse('feeds:no_workspace'), fetch_redirect_response=False)
         self.assertEqual(other.get('/').status_code, 200)
+
+    def test_registered_person_joins_another_team_with_the_same_account(self):
+        self.signup()
+        user = get_user_model().objects.get(email='someone@example.com')
+        initial = Membership.objects.get(user=user)
+        password_hash = user.password
+        team = Workspace.objects.create(name='Equipe compartilhada')
+        owner = get_user_model().objects.create_user(username='owner@example.com')
+        Membership.objects.create(workspace=team, user=owner, role=Membership.ADMIN)
+        administrator = Client()
+        administrator.force_login(owner)
+
+        response = administrator.post(reverse('feeds:users'), {'email':user.email.upper(), 'role':Membership.EDITOR})
+        self.assertEqual(response.status_code, 302)
+        user.refresh_from_db()
+        self.assertEqual(user.password, password_hash)
+        self.assertEqual(Membership.objects.get(workspace=team, user=user).role, Membership.EDITOR)
+        initial.refresh_from_db()
+        self.assertEqual(initial.role, Membership.ADMIN)
+        self.assertTrue(initial.active)
+
+        self.client.post(reverse('feeds:switch_workspace'), {'workspace_id':team.pk})
+        response = self.client.get('/')
+        self.assertEqual(response.wsgi_request.user.pk, user.pk)
+        self.assertEqual(response.wsgi_request.workspace.pk, team.pk)
+        self.client.post(reverse('feeds:logout'))
+        self.assertEqual(self.client.post(reverse('feeds:login'), {'username':user.email, 'password':'Strong-example-7419!'}).status_code, 302)

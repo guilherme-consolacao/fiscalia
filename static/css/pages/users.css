@@ -6,8 +6,21 @@
 .team-page table { width: 100%; border-collapse: collapse; text-align: left; font-size: .875rem; }
 .team-page caption { padding: .75rem; text-align: left; font-weight: 600; background: #f8fafc; }
 .team-page th, .team-page td { padding: .75rem; border-top: 1px solid var(--border-color); overflow-wrap: anywhere; }
+.team-page td { white-space: nowrap; }
 .team-page a { color: #355c37; text-underline-offset: .2em; }
 .team-page .account-card { max-width: 100%; box-shadow: none; }
 .team-page h2 { font-size: 1.125rem; margin-bottom: .75rem; }
-.team-page-edit { margin: 2rem auto; }
+.team-page .team-context { display: flex; align-items: center; gap: .5rem; max-width: 100%; color: #355c37; }
+.team-context svg { width: 18px; height: 18px; flex-shrink: 0; }
+.team-context span { overflow-wrap: anywhere; }
+.team-roles { border: 1px solid var(--border-color); border-radius: .75rem; background: #f8fafc; padding: 0 .75rem; margin-bottom: 1rem; }
+.team-roles summary { cursor: pointer; min-height: 44px; padding-block: .75rem; color: #355c37; font-weight: 600; }
+.team-roles dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; padding-bottom: .75rem; }
+.team-roles dt { font-weight: 600; margin-bottom: .25rem; }
+.team-roles dd { margin: 0; color: var(--text-muted); line-height: 1.5; }
+.team-member-name, .team-member-email { display: block; }
+.team-member-email { margin-top: .25rem; font-size: .8125rem; font-weight: 400; color: var(--text-muted); }
+.team-current-user { display: inline-block; font-size: .6875rem; font-weight: 600; color: #355c37; background: #edf2ea; padding: .125rem .375rem; border-radius: 999px; }
+.team-page-edit { margin: var(--page-gutter) auto; width: min(calc(100% - 2 * var(--page-gutter)), 34rem); }
+@media (max-width: 640px) { .team-roles dl { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .team-page th, .team-page td { padding: .75rem; min-width: 7rem; } }

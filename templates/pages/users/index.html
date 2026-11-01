@@ -6,14 +6,46 @@
 {% block header_badge %}{% endblock %}
 {% block content %}
 <section class="team-page">
-  <h1>Equipe de {{ request.workspace.name }}</h1>
-  <p>Compartilhe o acervo deste espaço. Leitores consultam informativos; editores gerenciam fontes, tags e atualizações; administradores também gerenciam a equipe.</p>
+  <h1>Gerenciar equipe</h1>
+  <p class="team-context"><i data-lucide="users" aria-hidden="true"></i><span>Equipe atual: <strong>{{ request.workspace.name }}</strong></span></p>
+  <p>Cada pessoa entra com a própria conta. Aqui você gerencia quem pode acessar as fontes, tags e informativos desta equipe.</p>
   {% if messages %}<ul class="feedback-messages" aria-live="polite">{% for message in messages %}<li class="feedback-message {{ message.tags }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
-  <div class="table-scroll" role="region" aria-label="Membros do espaço" tabindex="0">
-  <table><caption>Pessoas com acesso ao espaço</caption><thead><tr><th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">Perfil</th><th scope="col">Estado</th><th scope="col">Ação</th></tr></thead>
-  <tbody>{% for member in members %}<tr><th scope="row">{{ member.user.first_name|default:member.user.username }}</th><td>{{ member.user.email }}</td><td>{{ member.get_role_display }}</td><td>{% if member.active and member.user.is_active %}Ativo{% else %}Desativado{% endif %}</td><td><a href="{% url 'feeds:edit_user' member.pk %}" aria-label="Editar acesso de {{ member.user.first_name|default:member.user.username }}">Editar</a></td></tr>{% empty %}<tr><td colspan="5">Nenhuma pessoa neste espaço.</td></tr>{% endfor %}</tbody></table>
+  <details class="team-roles">
+    <summary>Entenda os papéis nesta equipe</summary>
+    <dl>
+      <div><dt>Leitor</dt><dd>Consulta informativos e gerencia suas leituras e acompanhamentos.</dd></div>
+      <div><dt>Editor</dt><dd>Também gerencia fontes, tags e atualizações.</dd></div>
+      <div><dt>Administrador</dt><dd>Também adiciona pessoas e gerencia o acesso à equipe.</dd></div>
+    </dl>
+  </details>
+  <div class="table-scroll" role="region" aria-label="Pessoas nesta equipe" tabindex="0">
+  <table>
+    <caption>Contas nesta equipe</caption>
+    <thead><tr><th scope="col">Conta</th><th scope="col">Papel nesta equipe</th><th scope="col">Acesso</th><th scope="col">Ação</th></tr></thead>
+    <tbody>
+      {% for member in members %}
+      <tr>
+        <th scope="row"><span class="team-member-name">{{ member.user.get_full_name|default:member.user.username }}{% if member.user_id == user.pk %} <span class="team-current-user">Você</span>{% endif %}</span><span class="team-member-email">{{ member.user.email }}</span></th>
+        <td>{{ member.get_role_display }}</td>
+        <td>{% if not member.user.is_active %}Conta desativada{% elif member.active %}Acesso ativo{% else %}Acesso desativado{% endif %}</td>
+        <td><a href="{% url 'feeds:edit_user' member.pk %}" aria-label="Editar acesso de {{ member.user.get_full_name|default:member.user.username }}">Editar acesso</a></td>
+      </tr>
+      {% empty %}<tr><td colspan="4">Nenhuma pessoa nesta equipe.</td></tr>{% endfor %}
+    </tbody>
+  </table>
   </div>
-  <section class="account-card"><h2>Adicionar pessoa</h2><p>A pessoa precisa criar uma conta primeiro. A inclusão compartilha somente o acervo deste espaço.</p><form method="post" data-account-form>{% csrf_token %}{{ form.as_div }}<button class="btn-primary" type="submit" data-submit-label="Adicionando…">Adicionar à equipe</button><p role="status" data-submit-status></p></form></section>
+  <section class="account-card" aria-labelledby="add-member-heading">
+    <h2 id="add-member-heading">Adicionar conta existente</h2>
+    <p>Informe o e-mail que a pessoa usa para entrar no Fiscalia. Ela continuará usando a mesma conta nas outras equipes.</p>
+    <p class="helptext">Se ainda não tiver conta, a pessoa deve acessar Criar conta e se cadastrar antes de você adicioná-la.</p>
+    <form method="post" data-account-form>
+      {% csrf_token %}
+      {{ form.as_div }}
+      <button class="btn-primary" type="submit" data-submit-label="Adicionando…">Adicionar à equipe</button>
+      <p role="status" data-submit-status></p>
+    </form>
+    <p class="helptext">A inclusão compartilha somente o acervo desta equipe. Cada pessoa mantém sua senha, leituras e acompanhamentos individuais.</p>
+  </section>
 </section>
 {% endblock %}
 {% block scripts %}{% load static %}<script src="{% static 'js/pages/accounts.js' %}"></script>{% endblock %}

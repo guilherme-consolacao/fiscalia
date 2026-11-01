@@ -40,7 +40,7 @@ def signup(request):
         else:
             login(request, user)
             request.session['workspace_id'] = workspace.pk
-            messages.success(request, 'Sua conta e seu espaço privado foram criados.')
+            messages.success(request, 'Sua conta e sua equipe privada inicial foram criadas.')
             return redirect('feeds:index')
     return render(request, 'pages/accounts/signup.html', {'form': form})
 

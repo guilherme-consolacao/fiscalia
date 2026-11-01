@@ -17,9 +17,9 @@ def index(request):
         except IntegrityError:
             created = False
         if created:
-            messages.success(request, 'Pessoa adicionada ao espaço. Os demais espaços dela permanecem privados.')
+            messages.success(request, 'Pessoa adicionada à equipe. Ela entra com a própria conta e pode escolher esta equipe no cabeçalho.')
             return redirect('feeds:users')
-        form.add_error('email', 'Esta pessoa já pertence ao espaço. Edite o acesso na lista.')
+        form.add_error('email', 'Esta pessoa já pertence à equipe. Edite o acesso na lista.')
     members = Membership.objects.filter(workspace=request.workspace).select_related('user').order_by('user__first_name', 'pk')
     return render(request, 'pages/users/index.html', {'members':members, 'form':form})
 
@@ -36,10 +36,10 @@ def edit(request, membership_id):
             current = Membership.objects.get(pk=member.pk, workspace=request.workspace)
             admins = Membership.objects.filter(workspace=request.workspace, active=True, role=Membership.ADMIN, user__is_active=True)
             if current.role == Membership.ADMIN and current.active and (not form.cleaned_data['active'] or form.cleaned_data['role'] != Membership.ADMIN) and admins.count() <= 1:
-                form.add_error(None, 'Mantenha pelo menos um administrador ativo no espaço.')
+                form.add_error(None, 'Mantenha pelo menos um administrador ativo na equipe.')
             else:
                 form.save()
-                messages.success(request, 'Acesso atualizado. A alteração vale imediatamente para as sessões abertas.')
+                messages.success(request, 'Acesso atualizado nesta equipe. A alteração vale imediatamente para as sessões abertas.')
                 return redirect('feeds:users')
     return render(request, 'pages/users/edit.html', {'form':form, 'member':member})
 
