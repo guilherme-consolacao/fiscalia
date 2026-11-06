@@ -1,8 +1,10 @@
 import logging
 from datetime import timedelta
+from ipaddress import ip_address
 from math import ceil
 from unicodedata import normalize
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import F
@@ -22,9 +24,14 @@ def allow_auth_attempt(request, action, limit, seconds):
 
 
 def auth_attempt_retry_after(request, action, limit, seconds):
-    # Only REMOTE_ADDR is trusted; forwarded headers require a separately
-    # configured reverse proxy. Raw IPs and credentials are never stored.
-    key = salted_hmac('auth-rate-limit', action + ':' + request.META.get('REMOTE_ADDR', '')).hexdigest()
+    origin = request.META.get('REMOTE_ADDR', '')
+    if getattr(settings, 'TRUST_RENDER_CLIENT_IP', False):
+        # Enable only when the Render edge replaces this header on ingress.
+        try:
+            origin = str(ip_address(request.META.get('HTTP_CF_CONNECTING_IP', '')))
+        except ValueError:
+            pass
+    key = salted_hmac('auth-rate-limit', action + ':' + origin).hexdigest()
     now = timezone.now()
     expires = now + timedelta(seconds=seconds)
     AuthRateLimit.objects.get_or_create(key=key, defaults={'expires_at':expires})

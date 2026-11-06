@@ -55,7 +55,7 @@ TRUST_PROXY_SSL_HEADER=False
 
 Em produção, HTTPS é obrigatório: cookies Secure/HttpOnly/SameSite, redirecionamento TLS, HSTS, `nosniff`, proteção contra enquadramento e política de conteúdo são habilitados. HSTS inclui subdomínios; valide todos os subdomínios antes de usar essa política no domínio real.
 
-Se o TLS termina em proxy reverso, habilite `TRUST_PROXY_SSL_HEADER=True` somente depois de garantir que ele elimina `X-Forwarded-Proto` fornecido pelo cliente e define o valor correto. O servidor também deve fornecer `REMOTE_ADDR` real e confiável; o limitador não confia diretamente em `X-Forwarded-For`. Um proxy sem essa configuração concentra todos os usuários no mesmo limite por IP.
+Se o TLS termina em proxy reverso, habilite `TRUST_PROXY_SSL_HEADER=True` somente depois de garantir que ele elimina `X-Forwarded-Proto` fornecido pelo cliente e define o valor correto. O limitador ignora `X-Forwarded-For` e usa `REMOTE_ADDR` por padrão. No Render, `TRUST_RENDER_CLIENT_IP=True` aceita apenas um IP válido de `CF-Connecting-IP`. Habilite a opção depois de confirmar que a borda substitui o cabeçalho e que o serviço só recebe tráfego pelo proxy esperado. O [guia de publicação](DEPLOYMENT.md) descreve essa verificação.
 
 Use `python manage.py check --deploy --settings=config.production` com as variáveis reais, execute migrações e `collectstatic`, e configure um servidor de aplicação de produção. `runserver` e `config.test_settings` não atendem à publicação.
 
@@ -63,8 +63,8 @@ Use `python manage.py check --deploy --settings=config.production` com as variá
 
 O procedimento de preparação do PostgreSQL e o ensaio de restauração estão no [guia de publicação](DEPLOYMENT.md). Antes de liberar acesso externo:
 
-1. Validar migrações e concorrência no PostgreSQL real, transferir dados com contagem e integridade por espaço e ensaiar restauração/rollback. Trocar a URL não importa o banco SQLite.
-2. Configurar HTTPS, processo WSGI/ASGI, estáticos, worker/agendamento durável, backup, retenção, restauração e observabilidade sem segredos.
+1. Repetir a validação no PostgreSQL do Neon. Caso seja necessário transferir dados existentes, conferir contagem e integridade por espaço e ensaiar restauração. Trocar a URL não importa o banco SQLite.
+2. Verificar HTTPS, estáticos, recuperação de coleta, backup, retenção e observabilidade no ambiente real. Um worker independente será necessário para garantir coleta contínua quando o piloto exigir essa disponibilidade.
 3. Aplicar limites no proxy e no banco: conexões, requisições, tempo, fontes/jobs por espaço e orçamento de IA. O limite de autenticação da aplicação não substitui proteção contra abuso distribuído; threads locais não garantem entrega após reinício.
 4. Validar cookies, cabeçalhos, isolamento, coleta, VLibras e permissões no domínio publicado. Repetir auditoria de dependências antes de cada liberação e manter atualizações.
 5. Usar credenciais novas do ambiente de produção. Rotacionar a chave OpenAI compartilhada durante a configuração e manter limite de gastos no provedor. Habilitar IA apenas após confirmar orçamento e política de envio de conteúdo.

@@ -43,6 +43,16 @@ class NewsImportProgressTests(TestCase):
         self.assertEqual(job.redirect_effective_date_to, '2026-05-31')
         mocked_start.assert_called_once_with(job.id)
 
+    @override_settings(ALLOW_SYNC_IMPORT_IN_TESTS=False)
+    def test_client_header_cannot_force_synchronous_import_outside_tests(self):
+        with patch('feeds.views.news.start_news_import_job') as start, patch('feeds.views.news.run_news_import_job') as run:
+            response = self.client.post(reverse('feeds:refresh_news'), HTTP_X_FISCALIA_SYNC_IMPORT='1')
+
+        job = NewsImportJob.objects.get()
+        self.assertRedirects(response, reverse('feeds:refresh_news_progress', args=[job.pk]), fetch_redirect_response=False)
+        start.assert_called_once_with(job.pk)
+        run.assert_not_called()
+
     def test_run_news_import_job_updates_job_counters_and_messages(self):
         Source.objects.create(
             name='Receita Federal',

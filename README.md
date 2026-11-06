@@ -79,6 +79,8 @@ python manage.py grant_workspace_admin --username usuario-existente --workspace 
 
 Faça backup antes de migrar uma base existente. SQLite é o padrão de desenvolvimento. Em produção, o Fiscalia exige PostgreSQL com TLS e verificação do hostname. Veja [preparação do banco e restauração](docs/DEPLOYMENT.md).
 
+O [guia de publicação](docs/DEPLOYMENT.md) também descreve o piloto Render Free com build remoto, HTTPS e recuperação da coleta.
+
 ### Cadastro e participação em equipes
 
 Em **Criar conta**, cada pessoa informa seu próprio nome, e-mail e senha. O formulário separa **Sua conta pessoal** de **Sua equipe inicial**: o cadastro sempre cria uma equipe privada inicial, administrada pela pessoa. Depois, a mesma conta pode participar de outras equipes sem novo cadastro nem senha compartilhada.

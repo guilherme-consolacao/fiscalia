@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.db.models import Case, F, IntegerField, Q, Value, When
@@ -141,7 +142,7 @@ def refresh_news(request):
         if job:
             return redirect('feeds:refresh_news_progress', job_id=job.pk)
         raise
-    if request.headers.get('X-Fiscalia-Sync-Import') == '1':
+    if getattr(settings, 'ALLOW_SYNC_IMPORT_IN_TESTS', False) and request.headers.get('X-Fiscalia-Sync-Import') == '1':
         run_news_import_job(job.id)
         return redirect('feeds:finalize_refresh_news_job', job_id=job.id)
     start_news_import_job(job.id)

@@ -5,11 +5,12 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.db import connections
-from django.test import TestCase, Client, TransactionTestCase, override_settings, skipUnlessDBFeature
+from django.test import TestCase, Client, RequestFactory, TransactionTestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
 from django.utils import timezone
 
 from feeds.models import Membership, Workspace, Source, AuthRateLimit
+from feeds.services.auth_rate_limit import auth_attempt_retry_after
 from feeds.tenancy import workspace_scope
 
 
@@ -124,6 +125,24 @@ class SecurityTests(TestCase):
         for name in ('feeds:login', 'admin:login'):
             self.assertEqual(browser.post(reverse(name), {'username':self.user.username, 'password':'wrong'}).status_code, 403)
         self.assertFalse(AuthRateLimit.objects.exists())
+
+    def test_health_endpoint_is_public_and_has_no_response_body(self):
+        response = self.client.get(reverse('health'))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.content, b'')
+
+    def test_render_client_ip_requires_an_explicit_trusted_proxy_setting(self):
+        factory = RequestFactory(REMOTE_ADDR='192.0.2.1')
+        first = factory.post('/', HTTP_CF_CONNECTING_IP='198.51.100.1')
+        second = factory.post('/', HTTP_CF_CONNECTING_IP='198.51.100.2')
+        malformed = factory.post('/', HTTP_CF_CONNECTING_IP='198.51.100.3, 192.0.2.2')
+        self.assertEqual(auth_attempt_retry_after(first, 'login', 1, 900), 0)
+        self.assertGreater(auth_attempt_retry_after(second, 'login', 1, 900), 0)
+        with override_settings(TRUST_RENDER_CLIENT_IP=True):
+            self.assertEqual(auth_attempt_retry_after(first, 'login', 1, 900), 0)
+            self.assertEqual(auth_attempt_retry_after(second, 'login', 1, 900), 0)
+            self.assertGreater(auth_attempt_retry_after(first, 'login', 1, 900), 0)
+            self.assertGreater(auth_attempt_retry_after(malformed, 'login', 1, 900), 0)
 
     @override_settings(SECURE_SSL_REDIRECT=True)
     def test_https_redirect_is_enabled_for_production(self):

@@ -9,6 +9,7 @@ NEWS_AI['ENABLED'] = False
 NEWS_AI['OPENAI_API_KEY'] = 'test-key-not-real'
 PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
 TEST_RUNNER = 'feeds.tests.runner.IsolatedTestRunner'
+ALLOW_SYNC_IMPORT_IN_TESTS = True
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False

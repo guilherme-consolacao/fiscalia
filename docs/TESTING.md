@@ -80,6 +80,13 @@ A suíte SQLite executou 226 testes, com um caso de concorrência reservado ao P
 
 No segundo Chrome, uma conta criada em SQLite descartável recebeu quatro respostas de credenciais inválidas. A quinta falha e o envio seguinte com a senha correta receberam `429`, exibindo a mensagem de espera. O relógio simulado nos testes automatizados verifica a expiração exata sem esperar 15 minutos. A suíte continua sem chamadas pagas de IA.
 
+## Ensaio de infraestrutura em 06/11/2026
+
+- PostgreSQL 17 descartável: **233 testes passaram**, incluindo migração com dados legados, requisições concorrentes de login, proteção do último administrador e uma única coleta ativa por equipe. O banco foi criado do zero, migrou sem pendências e teve backup e restauração ensaiados com duas equipes, logins, notícias e preferências individuais.
+- SQLite: **230 testes passaram** e três casos de concorrência foram reservados ao PostgreSQL. Nenhuma chamada paga de IA foi feita.
+- A configuração `config.production` foi exercitada com TLS e verificação de hostname. O papel restrito acessou os dados restaurados sem privilégio para criar objetos no schema. Em WSGI, a página de login respondeu com cookie seguro, o CSS foi servido pelo WhiteNoise e `/saude/` retornou `204`. `check --deploy`, o verificador de migrações, a auditoria de dependências da imagem e a sintaxe do script de entrada passaram.
+- A imagem e o Blueprint estão no repositório. O build remoto, a conexão com o Neon gerenciado, a URL pública e a confiança nos cabeçalhos da borda do Render dependem da validação no ambiente publicado.
+
 ## Limites e próxima liberação
 
 Cobertura não prova ausência de defeitos nem corresponde a todas as combinações de entradas. O contrato da API de IA foi simulado; um smoke test pago deve ser pequeno e deliberado ao habilitar o serviço. O VLibras depende de rede e serviço externo; sua validação e tratamento de indisponibilidade estão registrados em [SECURITY.md](SECURITY.md).

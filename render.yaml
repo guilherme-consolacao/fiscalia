@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fiscalia
+    runtime: docker
+    plan: free
+    branch: main
+    autoDeployTrigger: "off"
+    healthCheckPath: /saude/
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: TRUST_PROXY_SSL_HEADER
+        value: "True"
+      - key: NEWS_AI_ENABLED
+        value: "False"
