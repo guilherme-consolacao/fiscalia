@@ -17,6 +17,12 @@ O último administrador ativo não pode ser removido. Desativar a associação r
 
 Veja [arquitetura e análise Graphify](docs/ARCHITECTURE.md) e [segurança, validações e preparação para publicação](docs/SECURITY.md).
 
+## Acessar o piloto
+
+Abra o [Fiscalia](https://fiscalia-li9q.onrender.com) e selecione **Criar conta** para começar com uma equipe privada. O piloto usa Render Free com HTTPS e PostgreSQL 17 no Neon Free, em São Paulo. A IA fica desligada no piloto.
+
+O Render pode hibernar após 15 minutos sem acessos. A primeira abertura depois disso pode levar cerca de um minuto. Os dados ficam no PostgreSQL e persistem entre reinícios do serviço. O [guia de publicação](docs/DEPLOYMENT.md) descreve o deploy manual a partir da `main`, as migrações e a recuperação de coletas interrompidas.
+
 ## Tecnologias
 - Python 3.11+ (validação local: Python 3.14)
 - Django 5.2.18 LTS
@@ -79,8 +85,6 @@ python manage.py grant_workspace_admin --username usuario-existente --workspace 
 
 Faça backup antes de migrar uma base existente. SQLite é o padrão de desenvolvimento. Em produção, o Fiscalia exige PostgreSQL com TLS e verificação do hostname. Veja [preparação do banco e restauração](docs/DEPLOYMENT.md).
 
-O [guia de publicação](docs/DEPLOYMENT.md) também descreve o piloto Render Free com build remoto, HTTPS e recuperação da coleta.
-
 ### Cadastro e participação em equipes
 
 Em **Criar conta**, cada pessoa informa seu próprio nome, e-mail e senha. O formulário separa **Sua conta pessoal** de **Sua equipe inicial**: o cadastro sempre cria uma equipe privada inicial, administrada pela pessoa. Depois, a mesma conta pode participar de outras equipes sem novo cadastro nem senha compartilhada.
@@ -109,7 +113,7 @@ O botão de atualização inicia uma coleta por espaço e reutiliza uma execuç�
 python manage.py process_news_jobs --workspace 1 --recover-stale
 ```
 
-Esse comando encerra execuções sem progresso há mais de 30 minutos e executa jobs pendentes. O agendamento e o processo durável de produção serão configurados na tarefa de INFRA; threads locais não substituem essa operação.
+Esse comando encerra execuções sem progresso há mais de 30 minutos e executa jobs pendentes. No piloto, a coleta roda em segundo plano no processo web. Após uma interrupção, a recuperação é manual.
 
 ### 6. Iniciar o servidor de desenvolvimento
 ```bash
@@ -123,7 +127,7 @@ As páginas incluem acesso direto ao conteúdo, foco visível, nomes acessíveis
 
 O layout usa espaçamentos compactos, títulos de página de 24 px e barra lateral de 244 px no desktop. Em telas pequenas, o cabeçalho mantém menu, equipe e conta lado a lado e acompanha a rolagem. Os painéis de equipe/conta adaptam a largura, fecham com Escape ou clique externo e podem ser usados por teclado. Os filtros adicionais dos informativos ficam em **Fonte, status, relevância e vigência**; o painel permanece aberto quando há um desses filtros aplicado. O resumo original fica em **Resumo da fonte** quando difere do resumo da análise, evitando repetir o mesmo texto no card.
 
-Os arquivos CSS e o script global incluem `APP_VERSION` na URL. Atualize essa variável a cada versão publicada para invalidar o cache desses arquivos; a entrega e o cache dos estáticos importados devem ser configurados na INFRA.
+O deploy coleta os arquivos estáticos e o WhiteNoise os serve com compressão. Os arquivos CSS e o script global incluem `APP_VERSION` na URL. Atualize essa variável ao publicar uma versão com mudanças nesses arquivos para invalidar o cache.
 
 O botão **Ativar VLibras**, ao final das páginas autenticadas, carrega o serviço oficial somente sob demanda. É possível ocultá-lo e reativá-lo por teclado. A tradução é automática e depende do serviço externo, da rede e do suporte gráfico do navegador. A indisponibilidade é informada sem impedir o uso do portal. Consulte a [documentação oficial](https://www.vlibras.gov.br/doc/widget/installation/webpageintegration.html).
 
