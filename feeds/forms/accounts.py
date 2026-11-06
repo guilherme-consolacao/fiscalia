@@ -1,10 +1,31 @@
 from django import forms
+from django.contrib.admin.forms import AdminAuthenticationForm
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField
+
+from feeds.services.auth_rate_limit import LOGIN_WINDOW_SECONDS, auth_attempt_retry_after, validate_login_attempt
 
 
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(label='E-mail ou usuário', max_length=150, widget=forms.TextInput(attrs={'autocomplete': 'username', 'autofocus': True}))
+class LoginRateLimitMixin:
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        if self.request is None or not username or not self.cleaned_data.get('password'):
+            return super().clean()
+
+        retry_after = auth_attempt_retry_after(self.request, 'login', 10, LOGIN_WINDOW_SECONDS)
+        if not retry_after:
+            retry_after = validate_login_attempt(username, super().clean)
+        if retry_after:
+            self.request.login_retry_after = retry_after
+            raise forms.ValidationError(
+                'Muitas tentativas de entrada. Aguarde até 15 minutos e tente novamente.',
+                code='login_rate_limited',
+            )
+        return self.cleaned_data
+
+
+class LoginForm(LoginRateLimitMixin, AuthenticationForm):
+    username = UsernameField(label='E-mail ou usuário', max_length=150, widget=forms.TextInput(attrs={'autocomplete': 'username', 'autofocus': True}))
 
     def clean_username(self):
         value = self.cleaned_data['username'].strip()
@@ -13,7 +34,14 @@ class LoginForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
         super().confirm_login_allowed(user)
         if not user.memberships.filter(active=True).exists():
-            raise forms.ValidationError('Esta conta está sem acesso ativo. Fale com o administrador do seu espaço.', code='inactive')
+            raise self.get_invalid_login_error()
+
+
+class AdminLoginForm(LoginRateLimitMixin, AdminAuthenticationForm):
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)
+        if not user.is_superuser:
+            raise self.get_invalid_login_error()
 
 
 class SignupForm(UserCreationForm):

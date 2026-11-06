@@ -4,7 +4,7 @@
 
 Foram revisados autenticação, autorização, isolamento entre espaços, preferências individuais, entradas JSON/datas, CSRF, coleta de URLs externas, execução de jobs, cabeçalhos, dependências e exposição de erros. As correções incluem consultas fechadas sem contexto, restrição do Django Admin ao superusuário, limite persistente de tentativas, proteção contra requisições à rede interna e remoção de mensagens inesperadas detalhadas das respostas.
 
-`requirements.txt` contém versões fixadas. Django foi atualizado para 5.2.18, idna para 3.15, sqlparse para 0.6.0 e urllib3 para 2.8.0 após a auditoria de dependências. A última execução de `pip-audit`, em 19/10/2026, não encontrou vulnerabilidades conhecidas nas dependências declaradas. Isso é uma fotografia das bases consultadas, não garantia de ausência de vulnerabilidades desconhecidas.
+`requirements.txt` contém versões fixadas. Django foi atualizado para 5.2.18, idna para 3.15, sqlparse para 0.6.0 e urllib3 para 2.8.0 após a auditoria de dependências de 19/10/2026.
 
 Os ícones Lucide são servidos localmente; licença, versão e SHA-256 estão em `static/vendor/lucide/`. O VLibras é opcional e carrega JavaScript externo somente após acionamento. Sua política de conteúdo permite as origens oficiais e o caminho da versão 7.12.2 no CDN. Revisar os redirecionamentos e a CSP quando o serviço atualizar. Estilos inline permanecem permitidos para o comportamento visual existente e para o widget; scripts inline arbitrários não são permitidos.
 
@@ -26,6 +26,16 @@ python manage.py check
 python -m pip install pip-audit==2.10.1
 python -m pip_audit -r requirements.txt
 ```
+
+## Proteção do login e revisão de 05/11/2026
+
+- Cinco falhas para o mesmo identificador, dentro de 15 minutos, iniciam um bloqueio de 15 minutos a partir da quinta falha. Durante o bloqueio, a senha não é verificada, a resposta é `429` com `Retry-After` e novas tentativas não prolongam a espera. Um login bem-sucedido zera as falhas antes do bloqueio.
+- Portal e Django Admin compartilham o contador por identificador normalizado. Tentativas com conta desconhecida recebem o mesmo tratamento. A barreira adicional permite dez envios de credenciais por origem a cada 15 minutos, somando os dois formulários de login. O cadastro mantém seu limite independente. Requisições rejeitadas por CSRF não consomem tentativas.
+- A aplicação persiste os contadores no banco com chaves derivadas por HMAC, sem armazenar IP, identificador ou senha em claro. A autenticação é serializada por conta no PostgreSQL. A aplicação registra o início do bloqueio sem dados da conta. A espera temporária limita o impacto de bloqueios intencionais contra contas conhecidas. A barreira de origem depende do IP fornecido por um proxy confiável, a validar na INFRA.
+- `pip-audit` encontrou o aviso crítico [GHSA-6q48-6c7w-9gw2](https://github.com/certifi/python-certifi/security/advisories/GHSA-6q48-6c7w-9gw2) no Certifi. Após atualizar para 2026.10.23 e incluir o `defusedxml`, a nova consulta não encontrou vulnerabilidades conhecidas nas dependências declaradas. O `defusedxml` impede a expansão de entidades nos documentos XML das fontes e a coleta segue para as demais fontes após rejeitar um documento.
+- O Bandit 1.9.4 apontou o parser de XML, corrigido nesta revisão. O alerta `B113` restante foi conferido manualmente. O resumo semanal passa um timeout inteiro explícito de `NEWS_AI_TIMEOUT_SECONDS` para `requests.post`. A execução de `check --deploy` também passou em configuração local.
+
+A [matriz de testes](TESTING.md) registra a validação no PostgreSQL, no SQLite e no segundo Chrome. A política de bloqueio segue as recomendações de [autenticação da OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#login-throttling).
 
 ## Configuração de produção
 

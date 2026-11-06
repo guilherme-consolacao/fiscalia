@@ -599,6 +599,23 @@ class NewsViewTests(TestCase):
             captured_logs.output,
         )
 
+    def test_refresh_news_rejects_xml_entities_and_continues_with_other_sources(self):
+        Source.objects.create(name='A XML inseguro', url='https://example.com/unsafe', category=self.federal)
+        safe_source = Source.objects.create(name='B RSS seguro', url='https://example.com/safe', category=self.federal)
+        unsafe = DummyResponse('''<!DOCTYPE rss [<!ENTITY expanded "não importar">]>
+            <rss version="2.0"><channel><title>Fonte</title><item><title>&expanded;</title>
+            <link>https://example.com/unsafe-article</link><guid>unsafe</guid></item></channel></rss>''')
+        safe = DummyResponse(build_feed([{
+            'title': 'Informativo válido', 'link': 'https://example.com/safe-article',
+            'guid': 'safe', 'published_at': 'Tue, 12 May 2026 09:15:00 GMT', 'summary': 'Resumo',
+        }]))
+
+        with patch('feeds.services.news_import.fetch_url', side_effect=[unsafe, safe]):
+            response = self.client.post(reverse('feeds:refresh_news'), follow=True)
+
+        self.assertEqual(list(NewsItem.objects.values_list('source_id', flat=True)), [safe_source.pk])
+        self.assertContains(response, 'XML da fonte contém entidades não permitidas')
+
     def test_news_filters_by_query_source_and_status(self):
         source_a = Source.objects.create(
             name='Receita Federal',

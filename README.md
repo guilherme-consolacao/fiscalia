@@ -83,6 +83,8 @@ Faça backup antes de migrar uma base existente. A migração de acervo e prefer
 
 Em **Criar conta**, cada pessoa informa seu próprio nome, e-mail e senha. O formulário separa **Sua conta pessoal** de **Sua equipe inicial**: o cadastro sempre cria uma equipe privada inicial, administrada pela pessoa. Depois, a mesma conta pode participar de outras equipes sem novo cadastro nem senha compartilhada.
 
+Cinco tentativas de login sem sucesso em 15 minutos bloqueiam novas tentativas nessa conta por 15 minutos. O acesso volta automaticamente após a espera. Um login bem-sucedido antes do bloqueio zera a sequência de falhas. Consulte os detalhes em [Segurança](docs/SECURITY.md).
+
 Para incluir alguém, o administrador seleciona a equipe no cabeçalho e abre **Gerenciar equipe**. Em **Adicionar conta existente**, informa o e-mail já cadastrado pela pessoa e escolhe o **Papel nesta equipe**. Se a pessoa ainda não tiver conta, ela deve se cadastrar primeiro. A inclusão é imediata e não envia convite por e-mail; a equipe fica disponível em **Equipe atual** no próximo acesso ou ao recarregar a página.
 
 A lista reúne nome e e-mail de cada conta, marca **Você** e mostra papel e acesso naquela equipe. **Editar acesso** altera apenas essa participação. **Acesso desativado** bloqueia a equipe atual; **Conta desativada** indica que a conta inteira está inativa. A senha, os papéis e os vínculos nas demais equipes não são editados nessa tela. As permissões continuam sendo verificadas no servidor.

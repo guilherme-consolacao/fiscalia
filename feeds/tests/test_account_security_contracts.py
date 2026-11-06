@@ -39,7 +39,7 @@ class AccountSecurityContracts(WorkspaceScenario):
         user = get_user_model().objects.create_user(username='no-access@example.com', password='Example-strong-7419!')
         browser = Client()
         response = browser.post(reverse('feeds:login'), {'username':user.username, 'password':'Example-strong-7419!'})
-        self.assertContains(response, 'sem acesso ativo')
+        self.assertEqual(response.context['form'].non_field_errors().as_data()[0].code, 'invalid_login')
         self.assertNotIn('_auth_user_id', browser.session)
         user.is_active = False
         user.save(update_fields=['is_active'])
@@ -90,10 +90,24 @@ class AccountSecurityContracts(WorkspaceScenario):
             self.assertTrue(allow_auth_attempt(request, 'login', 2, 900))
         self.assertEqual(AuthRateLimit.objects.count(), 3)
 
-    def test_admin_login_has_its_own_throttle(self):
+    def test_admin_login_and_portal_share_the_account_lockout(self):
+        user = get_user_model().objects.create_superuser(username='platform-admin', password='Example-strong-7419!')
         browser = Client()
-        with patch('feeds.services.auth_rate_limit.allow_auth_attempt', return_value=False):
-            self.assertEqual(browser.post('/admin/login/', {'username':'platform', 'password':'wrong'}).status_code, 429)
+        now = timezone.now()
+        with patch('feeds.services.auth_rate_limit.timezone.now', return_value=now):
+            for _ in range(4):
+                self.assertEqual(browser.post(reverse('admin:login'), {'username':user.username, 'password':'wrong'}).status_code, 200)
+            response = browser.post(reverse('feeds:login'), {'username':user.username.upper(), 'password':'wrong'}, REMOTE_ADDR='192.0.2.10')
+            self.assertEqual(response.status_code, 429)
+            response = browser.post(reverse('admin:login'), {'username':user.username, 'password':'Example-strong-7419!'}, REMOTE_ADDR='192.0.2.11')
+            self.assertEqual(response.status_code, 429)
+            self.assertIn('Retry-After', response)
+            self.assertNotIn('_auth_user_id', browser.session)
+
+        with patch('feeds.services.auth_rate_limit.timezone.now', return_value=now + timedelta(minutes=15)):
+            response = browser.post(reverse('admin:login'), {'username':user.username, 'password':'Example-strong-7419!'})
+            self.assertEqual(response.status_code, 302)
+        self.assertEqual(int(browser.session['_auth_user_id']), user.pk)
 
     def test_no_workspace_page_handles_all_session_states(self):
         self.assertEqual(Client().get(reverse('feeds:no_workspace')).url, reverse('feeds:login'))

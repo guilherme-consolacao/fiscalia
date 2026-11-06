@@ -14,14 +14,6 @@ class PortalLoginView(LoginView):
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
-    def post(self, request, *args, **kwargs):
-        if not allow_auth_attempt(request, 'login', 10, 900):
-            form = self.authentication_form(request=request)
-            response = self.render_to_response(self.get_context_data(form=form, rate_limit_message='Muitas tentativas de entrada. Aguarde 15 minutos e tente novamente.'), status=429)
-            response['Retry-After'] = '900'
-            return response
-        return super().post(request, *args, **kwargs)
-
 
 def signup(request):
     if request.user.is_authenticated:

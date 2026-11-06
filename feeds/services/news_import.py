@@ -9,10 +9,11 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone as dt_timezone
 from email.utils import parsedate_to_datetime
 from urllib.parse import urlparse
-from xml.etree import ElementTree
 
 import feedparser
 import requests
+from defusedxml import ElementTree
+from defusedxml.common import DefusedXmlException
 from django.db import transaction
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -249,8 +250,12 @@ def import_news_items(timeout=15, progress_callback=None):
 
 
 def _import_source_entries(source, response, result, timeout, analysis_candidates):
+    try:
+        plone_item_types = _extract_plone_item_types(response.content)
+    except DefusedXmlException:
+        _register_error(result, source, 'O XML da fonte contém entidades não permitidas.')
+        return
     feed = feedparser.parse(response.content)
-    plone_item_types = _extract_plone_item_types(response.content)
 
     if _should_use_gov_br_listing_fallback(source.url, plone_item_types):
         _import_gov_br_listing(source, feed, response.url, result, timeout, analysis_candidates)

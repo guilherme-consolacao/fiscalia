@@ -74,6 +74,12 @@ A suíte completa passou com **219 testes**, sem chamadas pagas de IA. Os dois t
 
 Os fluxos funcionais conferidos foram cadastro inválido com confirmação de senha diferente, cadastro válido com equipe privada, rejeição de conta inexistente, inclusão de conta de teste existente, descrição dos papéis e desativação de um vínculo. Após corrigir a seleção do perfil do Chrome, foram reconferidos no segundo perfil o cadastro, o login individual, a listagem e a edição de acesso. Cadastro e listagem foram medidos nesse perfil em 320, 390, 768 e 1440 px sem rolagem horizontal da página; a tabela mantém rolagem própria. A edição de acesso foi conferida em 320 px. A extensão exigiu reconexão e substituição de abas durante a validação. Foram usados apenas dados sintéticos locais; não foram adicionadas dependências, migrações ou convites por e-mail.
 
+## Proteção contra força bruta em 05/11/2026
+
+A suíte SQLite executou 226 testes, com um caso de concorrência reservado ao PostgreSQL. Os 23 testes de segurança e autenticação também passaram em PostgreSQL 17 descartável, inclusive o caso com oito requisições simultâneas e apenas cinco verificações de senha para a mesma conta. Foram exercitados o desbloqueio, reinício da contagem após sucesso, troca de caixa e IP, limite por origem, CSRF, acesso pelo Django Admin e rejeição de entidades XML em uma fonte sem interromper a coleta das demais.
+
+No segundo Chrome, uma conta criada em SQLite descartável recebeu quatro respostas de credenciais inválidas. A quinta falha e o envio seguinte com a senha correta receberam `429`, exibindo a mensagem de espera. O relógio simulado nos testes automatizados verifica a expiração exata sem esperar 15 minutos. A suíte continua sem chamadas pagas de IA.
+
 ## Limites e próxima liberação
 
 Cobertura não prova ausência de defeitos nem corresponde a todas as combinações de entradas. O contrato da API de IA foi simulado; um smoke test pago deve ser pequeno e deliberado ao habilitar o serviço. O VLibras depende de rede e serviço externo; sua validação e tratamento de indisponibilidade estão registrados em [SECURITY.md](SECURITY.md).

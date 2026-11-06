@@ -33,13 +33,8 @@ class WorkspaceMiddleware:
     def process_view(self, request, view_func, view_args, view_kwargs):
         namespace = request.resolver_match.namespace
         name = request.resolver_match.url_name
-        if namespace == 'admin':
-            if request.user.is_authenticated and not request.user.is_superuser:
-                raise PermissionDenied('Administração da plataforma restrita.')
-            if name == 'login' and request.method == 'POST':
-                from feeds.services.auth_rate_limit import allow_auth_attempt
-                if not allow_auth_attempt(request, 'admin-login', 10, 900):
-                    return JsonResponse({'message':'Muitas tentativas. Aguarde 15 minutos.'}, status=429)
+        if namespace == 'admin' and request.user.is_authenticated and not request.user.is_superuser:
+            raise PermissionDenied('Administração da plataforma restrita.')
         if namespace != 'feeds' or name in {'login', 'signup', 'logout', 'no_workspace'}:
             return None
         if not request.user.is_authenticated:
@@ -56,6 +51,9 @@ class SecurityHeadersMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
+        if retry_after := getattr(request, 'login_retry_after', None):
+            response.status_code = 429
+            response['Retry-After'] = str(retry_after)
         response['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
         # The official VLibras host redirects its versioned assets to this CDN.
         libras_assets = 'https://cdn.jsdelivr.net/gh/spbgovbr-vlibras/vlibras-portal@v7.12.2/'
