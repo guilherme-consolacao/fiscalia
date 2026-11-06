@@ -6,8 +6,3 @@
 .libras-hidden [vw], .libras-hidden .vw-widget, .libras-hidden vlibras-widget, .libras-hidden #vlibras-access-wrapper, .libras-hidden #vlibras-plugin-wrapper, .libras-hidden #vlibras-app-root { display: none !important; }
 .libras-support #vlibras-access-wrapper { position: relative !important; top: auto !important; right: auto !important; left: auto !important; bottom: auto !important; transform: none !important; width: 100% !important; height: 48px !important; z-index: 1 !important; margin-top: .75rem; }
 .libras-support button[hidden] { display: none; }
-.libras-layout { flex-direction: column; }
-.libras-layout #vlibras-app-root { display: block; width: min(360px, calc(100% - var(--sidebar-width) - 2 * var(--page-gutter))); position: relative; z-index: 1 !important; margin: .75rem var(--page-gutter) 1rem calc(var(--sidebar-width) + var(--page-gutter)); }
-@media (max-width: 1024px) {
-  .libras-layout #vlibras-app-root { width: min(360px, calc(100% - 40px)); margin-left: 20px; }
-}
