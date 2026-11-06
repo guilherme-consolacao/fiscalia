@@ -77,7 +77,7 @@ Abra `/cadastrar/` para criar a primeira conta e seu espaço privado. A migraç�
 python manage.py grant_workspace_admin --username usuario-existente --workspace 1
 ```
 
-Faça backup antes de migrar uma base existente. A migração de acervo e preferências é coberta por teste automatizado. SQLite atende ao desenvolvimento; a migração e validação operacional em PostgreSQL permanecem na tarefa de INFRA.
+Faça backup antes de migrar uma base existente. SQLite é o padrão de desenvolvimento. Em produção, o Fiscalia exige PostgreSQL com TLS e verificação do hostname. Veja [preparação do banco e restauração](docs/DEPLOYMENT.md).
 
 ### Cadastro e participação em equipes
 

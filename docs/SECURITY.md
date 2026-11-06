@@ -48,7 +48,7 @@ DEBUG=False
 SECRET_KEY=<segredo-aleatorio-do-ambiente>
 ALLOWED_HOSTS=portal.seu-dominio.example
 CSRF_TRUSTED_ORIGINS=https://portal.seu-dominio.example
-DATABASE_URL=postgresql://<usuario>:<senha>@<host>:5432/<banco>
+DATABASE_URL=postgresql://<usuario>:<senha>@<host>:5432/<banco>?sslmode=verify-full&channel_binding=require
 NEWS_AI_ENABLED=False
 TRUST_PROXY_SSL_HEADER=False
 ```
@@ -61,7 +61,7 @@ Use `python manage.py check --deploy --settings=config.production` com as variá
 
 ## Itens da INFRA, fora desta entrega
 
-Publicação e migração PostgreSQL permanecem no Trello por orientação do solicitante. Antes de liberar acesso externo:
+O procedimento de preparação do PostgreSQL e o ensaio de restauração estão no [guia de publicação](DEPLOYMENT.md). Antes de liberar acesso externo:
 
 1. Validar migrações e concorrência no PostgreSQL real, transferir dados com contagem e integridade por espaço e ensaiar restauração/rollback. Trocar a URL não importa o banco SQLite.
 2. Configurar HTTPS, processo WSGI/ASGI, estáticos, worker/agendamento durável, backup, retenção, restauração e observabilidade sem segredos.

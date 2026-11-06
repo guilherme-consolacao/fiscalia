@@ -43,4 +43,4 @@ O RSS é importado mesmo com IA desativada ou indisponível. A extração da mat
 
 ## Evolução de infraestrutura
 
-O código recebe `DATABASE_URL`, usa migrações Django e inclui o driver PostgreSQL. Desenvolvimento e testes locais usam SQLite. PostgreSQL, migração dos dados reais, concorrência com múltiplos processos, backups/restauração, HTTPS, estáticos e execução durável da coleta ainda exigem implantação e validação na tarefa de INFRA. Alterar apenas a URL não transfere o conteúdo do SQLite.
+O código recebe `DATABASE_URL` e usa migrações Django. Desenvolvimento usa SQLite por padrão. Em produção, o Django exige PostgreSQL com host explícito e TLS com verificação de hostname. O [guia de publicação](DEPLOYMENT.md) detalha provisionamento, privilégios e restauração. Trocar a URL não transfere o conteúdo do SQLite.

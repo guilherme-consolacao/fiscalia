@@ -15,12 +15,6 @@ from feeds.tests.scenarios import WorkspaceScenario
 
 
 class ImportWorkerContracts(WorkspaceScenario):
-    def setUp(self):
-        super().setUp()
-        closer = patch('feeds.services.news_import_jobs.close_old_connections')
-        self.closer = closer.start()
-        self.addCleanup(closer.stop)
-
     def test_worker_claims_once_and_restores_callers_workspace(self):
         def importer(progress_callback):
             self.assertEqual(list(NewsItem.objects.values_list('pk', flat=True)), [self.item.pk])
@@ -35,7 +29,6 @@ class ImportWorkerContracts(WorkspaceScenario):
         self.assertEqual(self.job.status, 'completed')
         self.assertEqual(self.job.imported_created_count, 2)
         self.assertIsNotNone(self.job.finished_at)
-        self.assertGreaterEqual(self.closer.call_count, 2)
 
     def test_failure_marks_job_terminal_without_exposing_exception(self):
         with patch('feeds.services.news_import_jobs.import_news_items', side_effect=RuntimeError('sensitive-internal-detail')), self.assertLogs(jobs.logger, level='ERROR'):
@@ -57,6 +50,12 @@ class ImportWorkerContracts(WorkspaceScenario):
         self.assertTrue(thread.call_args.kwargs['daemon'])
         self.assertEqual(thread.call_args.kwargs['args'], (self.job.pk,))
         worker.start.assert_called_once()
+        with patch('feeds.services.news_import_jobs.connections.close_all') as close, \
+                patch('feeds.services.news_import_jobs.run_news_import_job', side_effect=RuntimeError('falha')) as run:
+            with self.assertRaises(RuntimeError):
+                thread.call_args.kwargs['target'](self.job.pk)
+        run.assert_called_once_with(self.job.pk)
+        close.assert_called_once()
 
     def test_only_one_pending_or_running_job_is_allowed_per_workspace(self):
         with self.assertRaises(IntegrityError), transaction.atomic():

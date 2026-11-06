@@ -1,7 +1,7 @@
 import logging
 from threading import Thread
 
-from django.db import close_old_connections
+from django.db import connections
 from django.utils import timezone
 
 from feeds.models import NewsImportJob
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def start_news_import_job(job_id):
     worker = Thread(
-        target=run_news_import_job,
+        target=_run_background_job,
         args=(job_id,),
         daemon=True,
         name=f'news-import-job-{job_id}',
@@ -22,8 +22,14 @@ def start_news_import_job(job_id):
     return worker
 
 
+def _run_background_job(job_id):
+    try:
+        return run_news_import_job(job_id)
+    finally:
+        connections.close_all()
+
+
 def run_news_import_job(job_id):
-    close_old_connections()
     try:
         job = NewsImportJob.all_objects.get(pk=job_id)
         with workspace_scope(job.workspace_id):
@@ -32,12 +38,9 @@ def run_news_import_job(job_id):
             return _run_news_import_job(job_id)
     except NewsImportJob.DoesNotExist:
         logger.warning('Job de importação não encontrado.')
-    finally:
-        close_old_connections()
 
 
 def _run_news_import_job(job_id):
-    close_old_connections()
     try:
         job = NewsImportJob.objects.get(pk=job_id)
         reporter = NewsImportJobReporter(job)
@@ -49,8 +52,6 @@ def _run_news_import_job(job_id):
     except Exception as error:  # pragma: no cover - proteção adicional para execução em thread
         logger.exception('Falha inesperada ao executar job de importação de informativos %s', job_id)
         _mark_job_failed(job_id, error)
-    finally:
-        close_old_connections()
 
 
 class NewsImportJobReporter:

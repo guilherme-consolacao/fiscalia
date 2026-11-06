@@ -2,6 +2,11 @@
 *~
 __pycache__/
 .env
+.env.*
+!.env.example
+.pgpass
+.pg_service.conf
+*.dump
 db.sqlite3
 /staticfiles/
 /media/

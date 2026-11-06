@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.test.utils import override_settings
 from django.urls import reverse
 
-from feeds.models import NewsItemAnalysis
+from feeds.models import NewsItem, NewsItemAnalysis
 from feeds.services.news_analysis import _parse_structured_json_response
 from feeds.tests.test_news import DummyJsonResponse, build_ai_settings
 from feeds.tests.test_news_ai import NewsAnalysisTests
@@ -17,35 +17,22 @@ class NewsAnalysisResponseParsingTests(NewsAnalysisTests):
         feed_response = self._feed_response()
         article_response = self._article_response()
 
-        response_text = json.dumps(
-            {
-                'items': [
-                    {
-                        'item_id': '1',
-                        'summary': 'Resumo consolidado em partes.',
-                        'impact_level': 'medium',
-                        'impact_context': 'Impacto moderado.',
-                        'keywords': ['ICMS', 'STF'],
-                        'importance_score': 82,
-                        'effective_date': '2026-12-01',
-                        'effective_date_label': 'Dez/2026',
-                    }
-                ]
-            },
-            ensure_ascii=False,
-        )
-
-        split_index = len(response_text) // 2
-        split_payload = {
-            'output': [
-                {
-                    'content': [
-                        {'type': 'output_text', 'text': response_text[:split_index]},
-                        {'type': 'output_text', 'text': response_text[split_index:]},
-                    ]
-                }
-            ]
-        }
+        def split_response(*args, **kwargs):
+            response_text = json.dumps({'items': [{
+                'item_id': str(NewsItem.objects.get().pk),
+                'summary': 'Resumo consolidado em partes.',
+                'impact_level': 'medium',
+                'impact_context': 'Impacto moderado.',
+                'keywords': ['ICMS', 'STF'],
+                'importance_score': 82,
+                'effective_date': '2026-12-01',
+                'effective_date_label': 'Dez/2026',
+            }]}, ensure_ascii=False)
+            split_index = len(response_text) // 2
+            return DummyJsonResponse({'output': [{'content': [
+                {'type': 'output_text', 'text': response_text[:split_index]},
+                {'type': 'output_text', 'text': response_text[split_index:]},
+            ]}]})
 
         with (
             patch(
@@ -54,7 +41,7 @@ class NewsAnalysisResponseParsingTests(NewsAnalysisTests):
             ),
             patch(
                 'feeds.services.news_analysis.requests.post',
-                return_value=DummyJsonResponse(split_payload),
+                side_effect=split_response,
             ),
         ):
             response = self.client.post(reverse('feeds:refresh_news'), follow=True)

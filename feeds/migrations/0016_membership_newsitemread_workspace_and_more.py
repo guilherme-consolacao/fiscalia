@@ -29,6 +29,10 @@ def migrate_legacy_preferences(apps, schema_editor):
         for reminder in Reminder.objects.using(alias).filter(user__isnull=True):
             Reminder.objects.using(alias).get_or_create(user_id=user.pk, news_item_id=reminder.news_item_id, effective_date=reminder.effective_date, days_before=reminder.days_before, defaults={'reminder_date': reminder.reminder_date, 'dismissed_at': reminder.dismissed_at})
 
+    if schema_editor.connection.vendor == 'postgresql':
+        # Flush deferred FK checks before Django creates the remaining indexes.
+        schema_editor.execute('SET CONSTRAINTS ALL IMMEDIATE')
+
 
 class Migration(migrations.Migration):
 

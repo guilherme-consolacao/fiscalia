@@ -1,7 +1,9 @@
-import environ
 import os
-from django.core.exceptions import ImproperlyConfigured
 from pathlib import Path
+
+import certifi
+import environ
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +33,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
-if env('APP_ENV', default='development') == 'production':
+IS_PRODUCTION = env('APP_ENV', default='development') == 'production'
+if IS_PRODUCTION:
     if DEBUG or len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 5 or SECRET_KEY.startswith(('django-insecure-', 'test-only')):
         raise ImproperlyConfigured('Produção exige DEBUG=False e SECRET_KEY aleatória com pelo menos 50 caracteres.')
     if not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS:
@@ -90,10 +93,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db(default='sqlite:///' + str(BASE_DIR / 'db.sqlite3')),
+    'default': env.db() if IS_PRODUCTION else env.db(default='sqlite:///' + str(BASE_DIR / 'db.sqlite3')),
 }
-DATABASES['default']['CONN_MAX_AGE'] = env.int('DB_CONN_MAX_AGE', default=60)
-if DATABASES['default']['ENGINE'].endswith('sqlite3'):
+DATABASES['default']['CONN_MAX_AGE'] = env.int('DB_CONN_MAX_AGE', default=0 if IS_PRODUCTION else 60)
+if IS_PRODUCTION:
+    if DATABASES['default']['ENGINE'] != 'django.db.backends.postgresql' or not DATABASES['default'].get('HOST'):
+        raise ImproperlyConfigured('Produção exige DATABASE_URL com um host PostgreSQL explícito.')
+    database_options = DATABASES['default'].setdefault('OPTIONS', {})
+    if database_options.setdefault('sslmode', 'verify-full') != 'verify-full':
+        raise ImproperlyConfigured('Produção exige sslmode=verify-full para o PostgreSQL.')
+    database_options.setdefault('sslrootcert', certifi.where())
+    database_options.setdefault('connect_timeout', 10)
+    DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+elif DATABASES['default']['ENGINE'].endswith('sqlite3'):
     DATABASES['default']['OPTIONS'] = {'timeout': 30}
 
 
